@@ -206,6 +206,9 @@ import json
 import sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 def search_reports(query, json_path="hackerone_public_reports.json"):
     path = Path(json_path)
     if not path.exists():
