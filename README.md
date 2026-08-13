@@ -150,7 +150,7 @@ Once generated, copy or reference the `skills/hackerone-bug-bounty` folder in yo
 
 ---
 
-## 🤝 How to Contribute (কন্ট্রিবিউট করার নিয়ম)
+## 🤝 How to Contribute
 
 We welcome community contributions! Whether you want to add new report datasets, fix bugs, or improve AI prompts, follow these steps:
 
