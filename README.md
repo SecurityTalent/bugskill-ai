@@ -1,11 +1,22 @@
 # 🛡️ HackerOne Public Bug Bounty Reports Auto-Downloader & AI Skill Exporter
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License:--MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![HackerOne API](https://img.shields.io/badge/HackerOne-API%20v1-red.svg)](https://api.hackerone.com/)
+[![Disclosed Reports](https://img.shields.io/badge/Disclosed%20Reports-9%2C950-brightgreen.svg)](#-dataset-overview)
 [![AI Skill Ready](https://img.shields.io/badge/AI%20Skill-Antigravity%20%7C%20Cursor%20%7C%20Claude-brightgreen.svg)]()
 
 Automatically download disclosed public bug bounty reports from **HackerOne Hacktivity**, save them into clean JSON datasets, and convert them into structured **AI Skills (`SKILL.md`)** for AI coding assistants (Antigravity, Cursor, Claude 3.5, ChatGPT, GitHub Copilot).
+
+---
+
+## 📊 Dataset Overview
+
+> 🚨 **Total Disclosed Reports Included:** **`9,950` real-world vulnerability reports** in `hackerone_public_reports.json`!
+
+- **Source:** Official HackerOne REST API (Hacktivity)
+- **Dataset File:** [`hackerone_public_reports.json`](hackerone_public_reports.json) (13.7 MB)
+- **Data Extracted:** Vulnerability titles, CWE classifications, bounties paid, severity ratings, program names, public URLs, and report summaries.
 
 ---
 
@@ -28,9 +39,10 @@ Automatically download disclosed public bug bounty reports from **HackerOne Hack
 ```text
 .
 ├── README.md                          # Repository documentation
+├── CONTRIBUTING.md                    # Contribution guidelines
 ├── hackerone_public.py                # Main HackerOne report downloader script
 ├── generate_ai_skill.py               # Exporter script (JSON -> AI Skill format)
-├── hackerone_public_reports.json      # Output JSON file with downloaded reports
+├── hackerone_public_reports.json      # 9,950 Disclosed reports dataset (JSON)
 └── skills/
     └── hackerone-bug-bounty/
         ├── SKILL.md                   # AI Skill Prompt & rules for AI Agents
@@ -76,8 +88,8 @@ set H1_API_TOKEN=YOUR_API_TOKEN
 
 1. **Clone this repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/hackerone-public-reports-ai-skill.git
-   cd hackerone-public-reports-ai-skill
+   git clone https://github.com/SecurityTalent/bugskill-ai.git
+   cd bugskill-ai
    ```
 
 2. **Install Python dependencies:**
@@ -112,9 +124,9 @@ python hackerone_public.py -i YOUR_IDENTIFIER -t YOUR_TOKEN --max-pages 10 --exp
 
 ---
 
-### 2. Generate AI Skill from Existing JSON
+## 2. Generate AI Skill from Existing JSON
 
-If you already have `hackerone_public_reports.json`, run:
+If you already have `hackerone_public_reports.json` (includes **9,950** reports), run:
 ```bash
 python generate_ai_skill.py
 ```
@@ -122,11 +134,11 @@ This generates the full AI Skill inside `skills/hackerone-bug-bounty/` and syncs
 
 ---
 
-### 3. Search Downloaded Reports Offline
+## 3. Search Downloaded Reports Offline
 
 Search for specific vulnerability types (e.g. IDOR, SSRF, OTP, Rate Limit, XSS):
 ```bash
-python skills/hackerone-bug-bounty/scripts/search_reports.py "OTP"
+python skills/hackerone-bug-bounty/scripts/search_reports.py "XSS"
 ```
 
 ---
@@ -139,33 +151,47 @@ Once generated, copy or reference the `skills/hackerone-bug-bounty` folder in yo
 
 ---
 
-## 📤 How to Push to GitHub (গিটহাব আপডেট গাইড)
+## 🤝 How to Contribute (কন্ট্রিবিউট করার নিয়ম)
 
-আপনার লোকাল ফোল্ডারটি গিটহাবে আপডেট করার জন্য নিচের নির্দেশনাসমূহ অনুসরণ করুন:
+We welcome community contributions! Whether you want to add new report datasets, fix bugs, or improve AI prompts:
 
-1. **গিট ইনিশিয়ালাইজ করুন (যদি পূর্বে করা না থাকে):**
+1. **Fork the Repository:** Click **Fork** at the top right of this GitHub page.
+2. **Clone your Fork:**
    ```bash
-   git init
+   git clone https://github.com/YOUR_USERNAME/bugskill-ai.git
+   cd bugskill-ai
    ```
-
-2. **সমস্ত ফাইল যুক্ত করুন:**
+3. **Create a Feature Branch:**
+   ```bash
+   git checkout -b feature/my-cool-feature
+   ```
+4. **Make Your Edits & Verify:**
+   ```bash
+   python generate_ai_skill.py
+   python skills/hackerone-bug-bounty/scripts/search_reports.py "XSS"
+   ```
+5. **Commit and Push:**
    ```bash
    git add .
+   git commit -m "Feat: Add support for custom severity filters"
+   git push origin feature/my-cool-feature
    ```
+6. **Submit a Pull Request (PR):** Open a PR on the main repository [`SecurityTalent/bugskill-ai`](https://github.com/SecurityTalent/bugskill-ai).
 
-3. **কমিক মেসেজ দিন:**
-   ```bash
-   git commit -m "Feat: HackerOne Auto Downloader and AI Skill Exporter"
-   ```
+For more detailed guidelines, see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-4. **মেইন ব্রাঞ্চ সেট করুন:**
-   ```bash
-   git branch -M main
-   ```
+---
 
-5. **আপনার গিটহাব রিপোজিটরি যুক্ত করুন:**
-   ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for details.
+
+---
+
+## ⚠️ Disclaimer
+
+This tool is designed for educational, research, and defensive security engineering purposes. All downloaded reports are public data disclosed by HackerOne programs under mutual agreement. Always adhere to program policies and ethical disclosure practices.
+ote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
    ```
 
 6. **গিটহাবে পুশ করুন:**
