@@ -4,9 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![HackerOne API](https://img.shields.io/badge/HackerOne-API%20v1-red.svg)](https://api.hackerone.com/)
 [![Disclosed Reports](https://img.shields.io/badge/Disclosed%20Reports-9%2C950-brightgreen.svg)](#-dataset-overview)
+[![Project Status](https://img.shields.io/badge/Status-Experimental%20%7C%20Beta-orange.svg)]()
 [![AI Skill Ready](https://img.shields.io/badge/AI%20Skill-Antigravity%20%7C%20Cursor%20%7C%20Claude-brightgreen.svg)]()
 
 Automatically download disclosed public bug bounty reports from **HackerOne Hacktivity**, save them into clean JSON datasets, and convert them into structured **AI Skills (`SKILL.md`)** for AI coding assistants (Antigravity, Cursor, Claude 3.5, ChatGPT, GitHub Copilot).
+
+> ⚠️ **Experimental & Beta Status Notice:**
+> This project is currently an **experimental proof-of-concept in Beta status**. Script workflows, prompt structures, and AI Skill exporters are undergoing active iteration. Community feedback, issue reports, and contributions are greatly appreciated as we refine the tooling.
 
 ---
 
