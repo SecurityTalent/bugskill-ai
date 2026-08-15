@@ -1,0 +1,19 @@
+# ==============================================================================
+# HackerOne Bug Bounty Intelligence & AI Agent Skills
+# ==============================================================================
+#
+# 🚀 ZERO EXTERNAL DEPENDENCY ARCHITECTURE:
+# All tools and scripts in this repository are natively built using the
+# Python 3 Standard Library (3.8+):
+#   - search_reports.py      : Uses json, argparse, pathlib, collections
+#   - hackerone_public.py    : Uses urllib.request, base64, json, argparse
+#   - otp_bruteforce.py      : Uses urllib.request, threading, json, argparse
+#
+# No 'pip install' is required to run any of the tools or Agent Skills.
+#
+# ==============================================================================
+# Optional Development, Testing & Code Quality Packages
+# ==============================================================================
+# requests>=2.28.0,<3.0.0
+# pytest>=7.0.0
+# flake8>=6.0.0
