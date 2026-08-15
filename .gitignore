@@ -70,3 +70,7 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Local Agent Runtimes & Caches (Keep repo clean)
+.agents/
+.claude/

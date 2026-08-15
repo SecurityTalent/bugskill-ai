@@ -1,6 +1,3 @@
-
-## File 2 — `scripts/url_parser_diff.py`
-
 #!/usr/bin/env python3
 """
 url_parser_diff.py - URL parser differential tester for SSRF filter bypass.

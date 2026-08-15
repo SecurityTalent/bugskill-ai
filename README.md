@@ -6,26 +6,27 @@
 [![Disclosed Reports](https://img.shields.io/badge/Disclosed%20Reports-9%2C950-brightgreen.svg)](#-dataset-overview)
 [![Total Bounty Paid](https://img.shields.io/badge/Total%20Bounties-%243.26M%2B-gold.svg)](#-dataset-overview)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-0%20External%20(Stdlib)-brightgreen.svg)](#-zero-external-dependencies)
-[![AI Skills Ready](https://img.shields.io/badge/AI%20Skills-Claude%20Code%20%7C%20Gemini%20%7C%20Codex%20%7C%20Antigravity-brightgreen.svg)](#-universal-agent-skills-framework-using-it)
+[![Universal AI Skills](https://img.shields.io/badge/AI%20Skills-Claude%20Code%20%7C%20Gemini%20%7C%20Codex%20%7C%20Antigravity-brightgreen.svg)](#-universal-agent-skills-framework-using-it)
 
-An enterprise-grade repository combining **9,950+ real-world disclosed HackerOne bug bounty reports** ($3.26M+ in bounties paid) with a modular, plug-and-play library of **AI Agent Skills** (`Claude Code Agent Skills/*`) designed for next-generation AI coding assistants: **Claude Code**, **Gemini CLI**, **Google Antigravity**, **ChatGPT / Codex CLI**, and **Cursor**.
+An enterprise-grade repository combining **9,950+ real-world disclosed HackerOne bug bounty reports** ($3.26M+ in bounties paid) with a modular, dynamic, plug-and-play library of **Universal AI Agent Skills** (`Claude Code Agent Skills/*`) designed for next-generation AI coding assistants: **Claude Code**, **Gemini CLI**, **Google Antigravity**, **ChatGPT / Codex CLI**, and **Cursor**.
 
 ---
 
 ## 📑 Table of Contents
 
 - [📊 Dataset Overview](#-dataset-overview)
-- [🧩 Universal Plug-and-Play Skills Architecture](#-universal-plug-and-play-skills-architecture)
-- [📁 Repository Layout](#-repository-layout)
+- [🧩 Universal Wildcard Skills Architecture (`Claude Code Agent Skills/*`)](#-universal-wildcard-skills-architecture-claude-code-agent-skills)
+- [📁 Clean Repository Layout](#-clean-repository-layout)
 - [⚡ Zero External Dependencies](#-zero-external-dependencies)
 - [🤖 Universal Agent Skills Framework ("Using It")](#-universal-agent-skills-framework-using-it)
   - [1. Cross-Agent Compatibility Matrix](#1-cross-agent-compatibility-matrix)
-  - [2. One-Command Batch Sync (Install All Skills at Once)](#2-one-command-batch-sync-install-all-skills-at-once)
+  - [2. One-Command Universal Sync (Install All Skills at Once)](#2-one-command-universal-sync-install-all-skills-at-once)
   - [3. Using with Claude Code](#3-using-with-claude-code)
-  - [4. Using with Gemini CLI & Antigravity](#4-using-with-gemini-cli--antigravity)
+  - [4. Using with Gemini CLI & Google Antigravity](#4-using-with-gemini-cli--google-antigravity)
   - [5. Using with ChatGPT / Codex CLI](#5-using-with-chatgpt--codex-cli)
   - [6. Using with Cursor / VS Code](#6-using-with-cursor--vs-code)
 - [📦 Inside `Claude Code Agent Skills/*`](#-inside-claude-code-agent-skills)
+  - [Active Skills in the Library](#active-skills-in-the-library)
 - [🔎 Offline Report Search & Intelligence CLI (`search_reports.py`)](#-offline-report-search--intelligence-cli-search_reportspy)
 - [⚡ HackerOne Hacktivity Downloader (`hackerone_public.py`)](#-hackerone-hacktivity-downloader-hackerone_publicpy)
 - [✍️ How to Add Any New Skill to the Library](#️-how-to-add-any-new-skill-to-the-library)
@@ -48,47 +49,56 @@ The repository contains an offline intelligence dataset of **`9,950` disclosed v
 
 ---
 
-## 🧩 Universal Plug-and-Play Skills Architecture
+## 🧩 Universal Wildcard Skills Architecture (`Claude Code Agent Skills/*`)
 
-The [`Claude Code Agent Skills/`](Claude%20Code%20Agent%20Skills/) directory is built as a **fully modular, wildcard-compatible skill engine**. 
+The [`Claude Code Agent Skills/`](Claude%20Code%20Agent%20Skills/) directory is engineered as a **wildcard, self-discovering skill library**. 
 
-> 💡 **Core Principle:** **Every single subdirectory inside `Claude Code Agent Skills/` is an autonomous, standalone Agent Skill.**
-> Whatever folder you place in `Claude Code Agent Skills/<skill-folder>/` will automatically work across all AI Agents as long as it contains a `SKILL.md` file.
+> 💡 **Core Principle:** **Every single directory placed inside `Claude Code Agent Skills/*` works autonomously across ALL AI Agent ecosystems.**
+> 
+> No matter what folder name or directory structure you add under `Claude Code Agent Skills/<any-skill-name>/`, as long as it contains a `SKILL.md` (with standard YAML frontmatter) and any optional helper files (`scripts/`, `references/`, `payloads/`), it will immediately execute across **Claude Code**, **Gemini CLI**, **Google Antigravity**, **Codex**, and **Cursor**.
 
 ```text
 Claude Code Agent Skills/
 ├── Note.md                            # Central ledger of converted HackerOne report IDs
 │
-├── otp-bruteforce-testing/            # Skill 1: OTP Brute-Force & Oracle Testing
+├── otp-bruteforce-testing/            # Skill: OTP Brute-Force & Oracle Testing (H1 #3265780)
 │   ├── SKILL.md                       # Structured methodology & agent instructions
 │   └── scripts/otp_bruteforce.py      # Standalone Python 3 stdlib automation tool
 │
-├── <any-new-skill-name>/              # Skill 2, Skill 3, ... (100% Plug-and-Play)
-│   ├── SKILL.md                       # Required: Frontmatter + attack methodology
-│   ├── scripts/                       # Optional: Standalone CLI tools & PoCs
-│   └── references/                    # Optional: Checklists, payloads & notes
+├── url-parser-confusion-testing/      # Skill: URL Parser Confusion & SSRF (H1 #3923212)
+│   ├── SKILL.md                       # Differential parsing methodology & vectors
+│   └── scripts/url_parser_diff.py     # Standalone differential testing tool
+│
+└── <any-future-skill-folder>/         # 🚀 100% Wildcard & Plug-and-Play
+    ├── SKILL.md                       # Required: Prompt instructions & methodology
+    ├── scripts/                       # Optional: Standalone automation tools & PoCs
+    └── references/                    # Optional: Checklists, payloads, and notes
 ```
 
 ---
 
-## 📁 Repository Layout
+## 📁 Clean Repository Layout
 
 ```text
 .
-├── README.md                          # Repository documentation & multi-agent guide
+├── README.md                          # Repository documentation & universal agent guide
 ├── requirements.txt                   # Dependency notes (Zero external dependencies)
 ├── search_reports.py                  # Offline multi-filter search CLI (Python stdlib)
 ├── hackerone_public.py                # HackerOne API Hacktivity downloader (Python stdlib)
 ├── hackerone_public_reports.json      # Offline dataset (9,950 disclosed reports)
 │
-├── Claude Code Agent Skills/          # 📦 MASTER SKILL LIBRARY (All skills live here)
-│   ├── Note.md                        # Master index of HackerOne report IDs
-│   └── */                             # Any skill folder (SKILL.md + scripts/)
-│
-└── .agents/skills/                    # Local workspace shared skills runtime
-    ├── hackerone-bug-bounty/
-    └── otp-bruteforce-testing/
+└── Claude Code Agent Skills/          # 📦 MASTER SKILL LIBRARY (Universal & Dynamic)
+    ├── Note.md                        # Master index of converted HackerOne report IDs
+    ├── otp-bruteforce-testing/        # OTP Brute-Force & Oracle Testing Skill
+    │   ├── SKILL.md
+    │   └── scripts/otp_bruteforce.py
+    ├── url-parser-confusion-testing/  # URL Parser Confusion & SSRF Filter Bypass Skill
+    │   ├── SKILL.md
+    │   └── scripts/url_parser_diff.py
+    └── <any-skill-folder>/            # Any directory here is auto-detected & supported
 ```
+
+> **Note on Local Agent Runtimes:** Local directories such as `.agents/` and `.claude/` are ignored via `.gitignore` to keep the public repository clean. All skills reside authoritatively in `Claude Code Agent Skills/*`.
 
 ---
 
@@ -96,42 +106,43 @@ Claude Code Agent Skills/
 
 All tools, search utilities, and skill scripts in this repository are written natively using the **Python 3 Standard Library** (Python 3.8+):
 
-- [`search_reports.py`](file:///C:/Users/user/Desktop/Desktop/search_reports.py) (`json`, `argparse`, `pathlib`, `collections`)
-- [`hackerone_public.py`](file:///C:/Users/user/Desktop/Desktop/hackerone_public.py) (`urllib.request`, `base64`, `json`, `argparse`)
-- [`Claude Code Agent Skills/*`](file:///C:/Users/user/Desktop/Desktop/Claude%20Code%20Agent%20Skills/) scripts (`urllib.request`, `threading`, `json`, `argparse`)
+- [`search_reports.py`](search_reports.py) (`json`, `argparse`, `pathlib`, `collections`)
+- [`hackerone_public.py`](hackerone_public.py) (`urllib.request`, `base64`, `json`, `argparse`)
+- [`Claude Code Agent Skills/*`](Claude%20Code%20Agent%20Skills/) (`urllib.request`, `threading`, `json`, `argparse`, `ipaddress`, `subprocess`)
 
-No third-party packages or `pip install` steps are required. Everything executes instantly.
+No third-party packages or `pip install` steps are required. Everything executes instantly out of the box.
 
 ---
 
 ## 🤖 Universal Agent Skills Framework ("Using It")
 
-Every skill in [`Claude Code Agent Skills/`](Claude%20Code%20Agent%20Skills/) adheres to the portable skill standard (`SKILL.md` with YAML frontmatter + optional `scripts/`), making it universally compatible across **Claude Code**, **Gemini CLI**, **Google Antigravity**, **ChatGPT / Codex CLI**, and **Cursor**.
+Every skill in [`Claude Code Agent Skills/`](Claude%20Code%20Agent%20Skills/) follows the portable open standard (`SKILL.md` with YAML frontmatter + optional standalone scripts), making it universally compatible across all major agent environments.
 
 ### 1. Cross-Agent Compatibility Matrix
 
-| AI Agent | Global / Personal Scope | Project / Repository Scope |
+| AI Agent Platform | Global / Personal Scope | Project / Repository Scope |
 | :--- | :--- | :--- |
 | **Claude Code** | `~/.claude/skills/<skill-name>/` | `.claude/skills/<skill-name>/` |
 | **Gemini CLI** | `~/.gemini/skills/` or `~/.agents/skills/` | `.gemini/skills/` or `.agents/skills/` |
 | **Google Antigravity** | `~/.agents/skills/<skill-name>/` | `.agents/skills/<skill-name>/` |
 | **ChatGPT / Codex CLI** | `~/.codex/skills/` or `~/.agents/skills/` | `.agents/skills/<skill-name>/` |
+| **Cursor / VS Code** | `@mention SKILL.md` | `.cursorrules` / `.vscode/` |
 
 ---
 
-### 2. One-Command Batch Sync (Install All Skills at Once)
+### 2. One-Command Universal Sync (Install All Skills at Once)
 
-You can sync **every skill** in `Claude Code Agent Skills/` into your target agent environment with a single command:
+You can sync **every single skill** in `Claude Code Agent Skills/*` into your target agent environment with a single command:
 
 #### Linux / macOS (Bash / Zsh):
 ```bash
 # Sync ALL skills to Claude Code (Project Scope)
 mkdir -p .claude/skills && cp -r "Claude Code Agent Skills/"* .claude/skills/
 
-# Sync ALL skills to Claude Code (Global Scope - All projects)
+# Sync ALL skills to Claude Code (Global Scope - Available in all projects)
 mkdir -p ~/.claude/skills && cp -r "Claude Code Agent Skills/"* ~/.claude/skills/
 
-# Sync ALL skills to Gemini CLI, Google Antigravity & OpenAI Codex (Shared Standard)
+# Sync ALL skills to Gemini CLI, Google Antigravity & OpenAI Codex
 mkdir -p ~/.agents/skills && cp -r "Claude Code Agent Skills/"* ~/.agents/skills/
 ```
 
@@ -143,7 +154,7 @@ New-Item -ItemType Directory -Force -Path ".claude\skills"; Copy-Item -Recurse -
 # Sync ALL skills to Claude Code (Global Scope)
 New-Item -ItemType Directory -Force -Path "$HOME\.claude\skills"; Copy-Item -Recurse -Force "Claude Code Agent Skills\*" "$HOME\.claude\skills\"
 
-# Sync ALL skills to Gemini CLI, Antigravity & Codex
+# Sync ALL skills to Gemini CLI, Google Antigravity & Codex
 New-Item -ItemType Directory -Force -Path "$HOME\.agents\skills"; Copy-Item -Recurse -Force "Claude Code Agent Skills\*" "$HOME\.agents\skills\"
 ```
 
@@ -153,12 +164,14 @@ New-Item -ItemType Directory -Force -Path "$HOME\.agents\skills"; Copy-Item -Rec
 
 Once installed or synced into `.claude/skills/` or `~/.claude/skills/`:
 
-#### Method 1: Slash Command
-Invoke any skill directly by typing its directory name:
+#### Method 1: Direct Slash Command
+Invoke any skill directly by typing its folder name:
 ```text
 /<skill-name>
-# Example:
+
+# Examples:
 /otp-bruteforce-testing
+/url-parser-confusion-testing
 ```
 
 #### Method 2: Natural Prompting (Auto-Invocation)
@@ -175,14 +188,14 @@ Claude Code will automatically:
 
 ---
 
-### 4. Using with Gemini CLI & Antigravity
+### 4. Using with Gemini CLI & Google Antigravity
 
 - **Auto-Discovery:** Antigravity and Gemini CLI automatically load and execute any skill located in `.agents/skills/` or `~/.agents/skills/`.
 - **Manual Import Single Skill:**
   ```bash
   gemini skills install "./Claude Code Agent Skills/<skill-name>"
   ```
-- **Execution:** Simply describe the security testing or code review scenario in your prompt.
+- **Execution:** Simply describe the security testing or code review scenario in your prompt; the agent autonomously plans and executes the phases.
 
 ---
 
@@ -210,7 +223,7 @@ Claude Code will automatically:
 
 ## 📦 Inside `Claude Code Agent Skills/*`
 
-Every skill directory is self-contained with zero external dependencies:
+Every skill directory in `Claude Code Agent Skills/*` is self-contained:
 
 ```text
 Claude Code Agent Skills/<skill-name>/
@@ -221,8 +234,13 @@ Claude Code Agent Skills/<skill-name>/
 ```
 
 ### Active Skills in the Library:
-- **`otp-bruteforce-testing`**: Complete OTP verification testing methodology (HackerOne [#3265780](https://hackerone.com/reports/3265780)) featuring response oracle discovery (e.g. 961-byte Content-Length anomaly), bounded multi-threading, rate-limit backoff, Burp Suite proxy routing, and request replay verification.
-- *(More specialized skills covering IDOR, Blind SSRF, Race Conditions, and OAuth bypasses are continuously added as subdirectories).*
+
+| Skill Directory | Target Vulnerability Class | Reference Report | Included Tooling |
+| :--- | :--- | :--- | :--- |
+| [`otp-bruteforce-testing`](Claude%20Code%20Agent%20Skills/otp-bruteforce-testing/) | OTP Brute-Force, Rate Limiting Bypass & Response Oracle Detection | HackerOne [#3265780](https://hackerone.com/reports/3265780) | [`scripts/otp_bruteforce.py`](Claude%20Code%20Agent%20Skills/otp-bruteforce-testing/scripts/otp_bruteforce.py) (Multi-threaded, proxy support, response oracle detection) |
+| [`url-parser-confusion-testing`](Claude%20Code%20Agent%20Skills/url-parser-confusion-testing/) | URL Parser Inconsistencies & SSRF Filter Bypass (Triple-Slash, Delimiters, Numeric IPs) | HackerOne [#3923212](https://hackerone.com/reports/3923212) | [`scripts/url_parser_diff.py`](Claude%20Code%20Agent%20Skills/url-parser-confusion-testing/scripts/url_parser_diff.py) (Differential parser testing across Python, cURL, and Node.js) |
+
+*(Additional skills covering IDOR, Blind SSRF, Race Conditions, OAuth Flaws, and Account Takeover are continuously added).*
 
 ---
 
@@ -248,6 +266,7 @@ python search_reports.py --program "shopify" --severity high
 
 # 5. Inspect deep report details by ID
 python search_reports.py --id 3265780
+python search_reports.py --id 3923212
 
 # 6. Display high-level dataset statistics
 python search_reports.py --stats
@@ -289,7 +308,7 @@ python hackerone_public.py --max-pages 0 --output hackerone_public_reports.json
 
 ## ✍️ How to Add Any New Skill to the Library
 
-To add a new skill to the collection:
+To add any new skill to the collection:
 
 1. **Pick a Disclosed Report:** Search `hackerone_public_reports.json` using `python search_reports.py`.
 2. **Create New Folder:** Create `Claude Code Agent Skills/<your-skill-name>/`.
