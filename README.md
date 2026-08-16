@@ -2,7 +2,7 @@
   <img src="Assets/BugSkill-AI-Logo.png" alt="BugSkill AI Logo" width="650" />
 </p>
 
-<h1 align="center">🛡️ BugSkill AI: HackerOne Bug Bounty Intelligence & Awesome AI Agent Skills</h1>
+<h1 align="center"> BugSkill AI: HackerOne Bug Bounty Intelligence & Awesome AI Agent Skills</h1>
 
 <p align="center">
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.8%2B-blue.svg" alt="Python Version"></a>
