@@ -1,12 +1,18 @@
-# 🛡️ HackerOne Bug Bounty Intelligence & Awesome AI Agent Skills
+<p align="center">
+  <img src="Assets/BugSkill-AI-Logo.png" alt="BugSkill AI Logo" width="650" />
+</p>
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![HackerOne API](https://img.shields.io/badge/HackerOne-API%20v1-red.svg)](https://api.hackerone.com/)
-[![Disclosed Reports](https://img.shields.io/badge/Disclosed%20Reports-9%2C950-brightgreen.svg)](#-dataset-overview)
-[![Total Bounty Paid](https://img.shields.io/badge/Total%20Bounties-%243.26M%2B-gold.svg)](#-dataset-overview)
-[![Curated Skills](https://img.shields.io/badge/AI%20Skills-16%20Active%20Skills-brightgreen.svg)](#-curated-agent-skills-collections)
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-0%20External%20(Stdlib)-brightgreen.svg)](#-zero-external-dependencies)
+<h1 align="center">🛡️ BugSkill AI: HackerOne Bug Bounty Intelligence & Awesome AI Agent Skills</h1>
+
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.8%2B-blue.svg" alt="Python Version"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://api.hackerone.com/"><img src="https://img.shields.io/badge/HackerOne-API%20v1-red.svg" alt="HackerOne API"></a>
+  <a href="#-dataset-overview"><img src="https://img.shields.io/badge/Disclosed%20Reports-9%2C950-brightgreen.svg" alt="Disclosed Reports"></a>
+  <a href="#-dataset-overview"><img src="https://img.shields.io/badge/Total%20Bounties-%243.26M%2B-gold.svg" alt="Total Bounty Paid"></a>
+  <a href="#-curated-agent-skills-collections"><img src="https://img.shields.io/badge/AI%20Skills-16%20Active%20Skills-brightgreen.svg" alt="Curated Skills"></a>
+  <a href="#-zero-external-dependencies"><img src="https://img.shields.io/badge/Dependencies-0%20External%20(Stdlib)-brightgreen.svg" alt="Zero Dependencies"></a>
+</p>
 
 An enterprise-grade repository combining **9,950+ real-world disclosed HackerOne bug bounty reports** ($3.26M+ in bounties paid) with two curated, modular, dynamic collections of **Universal AI Agent Skills** (`Awesome-Claude-Code-Agent-Skills/` & `Personal-Claude-Code-Agent-Skills/`) built for next-generation AI coding assistants: **Claude Code**, **Gemini CLI**, **Google Antigravity**, **ChatGPT / Codex CLI**, and **Cursor**.
 
@@ -89,6 +95,8 @@ Custom, deep vulnerability analysis skills derived directly from real-world Hack
 ```text
 .
 ├── README.md                              # Repository documentation & universal agent guide
+├── Assets/                                # Media assets & project branding
+│   └── BugSkill-AI-Logo.png               # Official BugSkill AI Logo
 ├── requirements.txt                       # Dependency notes (Zero external dependencies)
 ├── search_reports.py                      # Offline multi-filter search CLI (Python stdlib)
 ├── hackerone_public.py                    # HackerOne API Hacktivity downloader (Python stdlib)
