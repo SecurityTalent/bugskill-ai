@@ -1,0 +1,82 @@
+{
+  "_comment": "FETCH CHAIN CONFIG — optional, improves resilience",
+  "fetch_chain": {
+    "brave_api_key": "",
+    "_comment_brave": "Get a free key at https://brave.com/search/api/ — enables much better search fallback",
+    "cdp_url": "http://localhost:9222",
+    "_comment_cdp": "Chrome DevTools Protocol URL. Start Chrome with: chrome --remote-debugging-port=9222"
+  },
+
+  "pulses": [
+    {
+      "id": "my-digest",
+      "name": "My Daily Digest",
+      "description": "Daily curated news on topics I care about",
+      "recipient": "you@email.com",
+      "schedule": "0 7 * * *",
+      "timezone": "America/New_York",
+      "itemCount": 15,
+      "enabled": true,
+
+      "_comment_topics": "EDIT THESE — keywords that filter what's relevant across ALL sources",
+      "topics": [
+        "your topic one",
+        "your topic two",
+        "your topic three"
+      ],
+
+      "sources": {
+        "_comment": "Each source tries its native method first, then falls back through the fetch chain automatically.",
+
+        "twitter": {
+          "enabled": true,
+          "priority": 10,
+          "_comment": "Tier 1: bird CLI → Tier 2: Brave/DDG site:x.com search → Tier 3: fxtwitter API",
+          "accounts": [
+            "example_account1",
+            "example_account2"
+          ],
+          "searches": [
+            "your search query",
+            "another search term"
+          ]
+        },
+
+        "blogs": {
+          "enabled": true,
+          "priority": 9,
+          "_comment": "Fetches RSS/Atom feeds. Uses resilient fetch chain (urllib → curl → Playwright → CDP)",
+          "feeds": [
+            {"name": "Hacker News", "url": "https://hnrss.org/newest?q=your+topic"},
+            {"name": "Example Blog", "url": "https://example.com/feed.xml"}
+          ]
+        },
+
+        "reddit": {
+          "enabled": true,
+          "priority": 6,
+          "_comment": "Tier 1: Subreddit hot (filtered by topics) + Reddit search API (searches ALL of Reddit) → Tier 2: Brave/DDG site:reddit.com",
+          "subreddits": ["programming", "technology"]
+        },
+
+        "conferences": {
+          "enabled": false,
+          "priority": 8,
+          "_comment": "Tier 1: YouTube channel RSS feeds → Tier 2: Brave/DDG site:youtube.com topic search",
+          "youtube_channels": [
+            {"name": "Conference Name", "url": "https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID"}
+          ],
+          "keywords": ["talk", "filter", "keywords"]
+        },
+
+        "arxiv": {
+          "enabled": false,
+          "priority": 3,
+          "_comment": "arXiv API with resilient fetch fallback",
+          "categories": ["cs.AI", "cs.CL"],
+          "keywords": ["your research keyword"]
+        }
+      }
+    }
+  ]
+}

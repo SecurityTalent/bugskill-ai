@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { 
+            color: #00d4ff; 
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        h2 { color: #00d4ff; margin: 20px 0 15px; }
+        .summary {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+            background: #1a1a2e;
+            padding: 15px 25px;
+            border-radius: 8px;
+            min-width: 120px;
+        }
+        .stat-value {
+            display: block;
+            font-size: 2em;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+        .generated { color: #666; font-size: 0.9em; margin-top: 10px; }
+        .endpoint {
+            background: #16213e;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border-left: 4px solid #333;
+        }
+        .endpoint.risk-critical { border-left-color: #dc3545; }
+        .endpoint.risk-high { border-left-color: #fd7e14; }
+        .endpoint.risk-medium { border-left-color: #ffc107; }
+        .endpoint.risk-low { border-left-color: #28a745; }
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #0f3460;
+            flex-wrap: wrap;
+            cursor: pointer;
+        }
+        .endpoint-header:hover { background: #1a4a80; }
+        .method {
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+        .method-get { background: #28a745; color: #fff; }
+        .method-post { background: #007bff; color: #fff; }
+        .method-put { background: #fd7e14; color: #fff; }
+        .method-delete { background: #dc3545; color: #fff; }
+        .method-patch { background: #6f42c1; color: #fff; }
+        .method-options { background: #6c757d; color: #fff; }
+        .method-head { background: #17a2b8; color: #fff; }
+        .path { 
+            font-family: monospace; 
+            color: #fff; 
+            flex-grow: 1;
+            word-break: break-all;
+        }
+        .test-count { 
+            margin-left: auto; 
+            color: #888;
+            background: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .endpoint-url {
+            padding: 10px 15px;
+            background: #1a1a2e;
+            font-family: monospace;
+            font-size: 0.85em;
+            color: #666;
+            word-break: break-all;
+        }
+        .tests { 
+            padding: 15px;
+            display: none;
+        }
+        .tests.show { display: block; }
+        .test-case {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #333;
+        }
+        .test-case.risk-critical { border-left-color: #dc3545; }
+        .test-case.risk-high { border-left-color: #fd7e14; }
+        .test-case.risk-medium { border-left-color: #ffc107; }
+        .test-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .test-type {
+            font-family: monospace;
+            color: #00d4ff;
+            font-size: 0.9em;
+        }
+        .test-desc { 
+            color: #ccc; 
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge-critical { background: #dc3545; color: #fff; }
+        .badge-high { background: #fd7e14; color: #fff; }
+        .badge-medium { background: #ffc107; color: #000; }
+        .badge-low { background: #28a745; color: #fff; }
+        .curl-command {
+            position: relative;
+            background: #0d0d1a;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .curl-command pre {
+            padding: 15px;
+            padding-right: 50px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.8em;
+            color: #0f0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover { background: #555; }
+        .copy-btn.copied { background: #28a745; }
+        .payloads {
+            list-style: none;
+            margin: 10px 0;
+        }
+        .payloads li {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: #0d0d1a;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+        .payloads code {
+            color: #f90;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+        .filter-btn {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { background: #444; }
+        .filter-btn.active { background: #00d4ff; color: #000; }
+        .expand-all {
+            margin-left: auto;
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .expand-all:hover { background: #444; }
+        .note {
+            background: #2d2d44;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        .note strong { color: #00d4ff; }
+        .chevron {
+            transition: transform 0.2s;
+            color: #888;
+        }
+        .endpoint.expanded .chevron { transform: rotate(90deg); }
+        @media (max-width: 768px) {
+            .stats { flex-direction: column; }
+            .endpoint-header { flex-direction: column; align-items: flex-start; }
+            .test-count { margin-left: 0; margin-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 BAC/IDOR Analysis Report</h1>
+        
+        {{SUMMARY}}
+        
+        <div class="filter-bar">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-btn active" onclick="filterTests('all')">All</button>
+            <button class="filter-btn" onclick="filterTests('critical')">Critical</button>
+            <button class="filter-btn" onclick="filterTests('high')">High</button>
+            <button class="filter-btn" onclick="filterTests('auth_switch')">Auth Switch</button>
+            <button class="filter-btn" onclick="filterTests('403')">403 Bypass</button>
+            <button class="filter-btn" onclick="filterTests('method')">Method Switch</button>
+            <button class="expand-all" onclick="toggleAll()">Expand All</button>
+        </div>
+        
+        <h2>🎯 Endpoints & Test Cases</h2>
+        <div id="endpoints">
+            {{ENDPOINTS}}
+        </div>
+        
+        <div class="note">
+            <strong>Note:</strong> These are potential vulnerabilities detected through passive analysis. 
+            Always verify findings manually before reporting. Test cases are suggestions based on common 
+            BAC/IDOR patterns and may produce false positives.
+        </div>
+    </div>
+    
+    <script>
+        // Toggle endpoint details
+        document.querySelectorAll('.endpoint-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const endpoint = header.parentElement;
+                const tests = endpoint.querySelector('.tests');
+                endpoint.classList.toggle('expanded');
+                tests.classList.toggle('show');
+            });
+        });
+        
+        // Copy to clipboard
+        function copyToClipboard(btn) {
+            const pre = btn.nextElementSibling;
+            navigator.clipboard.writeText(pre.textContent).then(() => {
+                btn.textContent = '✅ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
+        // Filter tests
+        function filterTests(filter) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.endpoint').forEach(ep => {
+                let show = false;
+                
+                if (filter === 'all') {
+                    show = true;
+                } else if (filter === 'critical' || filter === 'high') {
+                    show = ep.classList.contains('risk-' + filter);
+                } else {
+                    const testTypes = ep.querySelectorAll('.test-type');
+                    testTypes.forEach(tt => {
+                        if (tt.textContent.includes(filter)) show = true;
+                    });
+                }
+                
+                ep.style.display = show ? 'block' : 'none';
+            });
+        }
+        
+        // Toggle all
+        let allExpanded = false;
+        function toggleAll() {
+            allExpanded = !allExpanded;
+            document.querySelectorAll('.endpoint').forEach(ep => {
+                const tests = ep.querySelector('.tests');
+                if (allExpanded) {
+                    ep.classList.add('expanded');
+                    tests.classList.add('show');
+                } else {
+                    ep.classList.remove('expanded');
+                    tests.classList.remove('show');
+                }
+            });
+            event.target.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+        }
+    </script>
+</body>
+</html>

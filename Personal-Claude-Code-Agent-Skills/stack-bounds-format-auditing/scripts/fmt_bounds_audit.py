@@ -1,6 +1,3 @@
-## File 2 — `scripts/fmt_bounds_audit.py`
-
-```python
 #!/usr/bin/env python3
 """
 fmt_bounds_audit.py - Audit C/C++ formatting code for stack buffer overflows

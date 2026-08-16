@@ -1,0 +1,698 @@
+{
+  "title": "SSRF to AWS Credential Compromise",
+  "subtitle": "Server-Side Request Forgery exploitation leading to EC2 metadata service access and IAM credential theft with subsequent customer data exfiltration",
+  "scenarioType": "Technical - Cloud Security",
+  "targetAudience": "SOC Analysts, Incident Response, DevOps/Cloud Security, Application Security",
+  "duration": "90-120 minutes",
+  "difficulty": "Intermediate",
+  "severity": "CRITICAL",
+  "preparedBy": "Security Operations Team",
+  "date": "February 6, 2026",
+  "version": "1.0",
+
+  "executiveSummary": "This tabletop exercise simulates a critical security incident where a threat actor exploits a Server-Side Request Forgery (SSRF) vulnerability in your web application's image processing API to access the AWS EC2 instance metadata service (169.254.169.254). The attacker successfully steals temporary IAM role credentials and uses them to exfiltrate 8.4 GB of customer data (500,000+ records) from S3 buckets before attempting destructive actions. The scenario tests your organization's ability to detect SSRF vulnerabilities, respond to AWS credential compromise, manage data breach notifications, and implement proper cloud security controls.",
+
+  "attackVector": "SSRF vulnerability in image resize API endpoint allows unrestricted outbound HTTP requests to AWS metadata service",
+  "potentialImpact": "Customer data breach (500K+ records), GDPR/CCPA notification requirements, potential $200K+ in lost revenue from service disruption, reputation damage",
+  "testingGoals": "Validate SSRF response procedures, test AWS credential rotation speed, assess CloudTrail/GuardDuty monitoring effectiveness, identify gaps in application security",
+  "criticalGaps": "SSRF incident response playbook, AWS credential compromise procedures, data breach notification protocols, IMDSv2 enforcement",
+
+  "scenarioOverview": "Your organization operates an e-commerce platform hosted on AWS. The web application includes an image resize API endpoint that accepts user-supplied URLs. A threat actor discovers this endpoint lacks proper input validation and crafts malicious requests targeting 169.254.169.254 (AWS metadata service). By exploiting the SSRF vulnerability, the attacker retrieves IAM role credentials attached to the EC2 instance. These temporary credentials provide read access to S3 buckets containing customer data. The attacker uses CloudTrail-visible API calls from an external IP address to enumerate and download 8.4 GB of customer records before attempting destructive actions (object deletion) and issuing a potential ransomware demand.",
+
+  "facilitatorGuide": {
+    "preparation": {
+      "timeline": "Begin preparation 2-3 weeks before exercise",
+      "tasks": [
+        "Book conference room with projector/screen (capacity for all participants)",
+        "Send calendar invites to all participants 2 weeks in advance with exercise overview",
+        "Confirm key decision-makers will attend (CISO, Engineering Lead, Legal, PR)",
+        "Print copies of scenario overview for each participant (optional)",
+        "Set up laptop with exercise materials and any demo artifacts",
+        "Review all injects and familiarize yourself with timing",
+        "Prepare any real system access (AWS console, CloudTrail, GuardDuty) if using live demo",
+        "Coordinate with IT for any tool access needed during exercise",
+        "Prepare sign-in sheet to track attendance for compliance records",
+        "Notify building security if exercise may trigger real alerts"
+      ],
+      "materialsNeeded": [
+        "This facilitator guide (printed or on tablet)",
+        "Laptop connected to projector",
+        "Whiteboard or flip chart for capturing action items",
+        "Timer (visible to participants)",
+        "Sign-in sheet with participant names and roles",
+        "Note-taker to document key decisions and discussions"
+      ],
+      "roomSetup": [
+        "U-shaped or conference table seating (encourages discussion)",
+        "Facilitator positioned at front with clear view of all participants",
+        "Projector/screen for displaying artifacts and scenarios",
+        "Whiteboard accessible for capturing key points",
+        "Clock visible to all participants for time awareness"
+      ]
+    },
+    "openingScript": "Good morning/afternoon everyone. Thank you for participating in today's tabletop exercise.\n\nToday we're going to walk through a realistic security incident scenario - specifically, a Server-Side Request Forgery attack leading to AWS credential theft and customer data breach. This is NOT a test of individual performance. The goal is to evaluate our organization's procedures, identify gaps, and improve our response capabilities as a team.\n\nThis exercise will take approximately 90-120 minutes. I'll present a series of timed 'injects' - think of these as new information or developments in the scenario. After each inject, we'll pause for discussion. I'll be asking questions to guide the conversation, but I want to hear your authentic thinking and see how our team works through these challenges.\n\nA few important ground rules before we begin...",
+    "groundRules": [
+      "No wrong answers - We're here to learn, not to criticize. Speak freely and honestly.",
+      "Psychological safety - Nothing said here will be used for performance evaluations.",
+      "Stay in role - Respond as you would in a real incident, based on your actual authority and procedures.",
+      "Use real procedures - If you don't know the procedure, say so. That's a gap we need to identify.",
+      "Pause for documentation - When we identify a gap or action item, we'll capture it immediately.",
+      "Time pressure is realistic - Some decisions will have time limits to simulate real incident pressure.",
+      "Ask clarifying questions - If you need more information about the scenario, just ask.",
+      "Respect the facilitator's role - I may interrupt to move things along or redirect discussion."
+    ],
+    "flowOverview": "The exercise is structured as a chronological incident timeline from T+0 (initial detection) through T+90 minutes (root cause identification). We'll progress through 6 major inject points, each building on the previous one. Each inject will have 10-20 minutes for discussion. The final 30 minutes will be a structured debrief where we review gaps identified and assign action items.",
+    "timing": {
+      "total": "90-120 minutes",
+      "breakdown": [
+        "Opening and ground rules: 10 minutes",
+        "Scenario overview: 5 minutes",
+        "Injects 1-6: 60-70 minutes (10-15 min each)",
+        "Break (optional): 10 minutes",
+        "Structured debrief: 20-30 minutes",
+        "Wrap-up and next steps: 5 minutes"
+      ],
+      "flexibility": "You can adjust timing based on discussion quality. If a critical debate emerges, let it run. If discussion stalls, move on quickly."
+    },
+    "facilitation": [
+      "Create psychological safety - Thank people for honest admissions like 'I don't know' or 'We don't have that procedure'",
+      "Encourage quiet participants - Specifically call on people who haven't spoken: 'Sarah, from the engineering perspective, what's your take?'",
+      "Manage dominant personalities - Politely interrupt and redirect: 'That's a great point, John. Let's hear from others before we decide.'",
+      "Use a parking lot - For off-topic but valid concerns: 'That's important. Let me capture that in our parking lot and we'll address it later.'",
+      "Stay neutral - Don't judge responses. Say 'Interesting approach' instead of 'good' or 'that won't work'",
+      "Read body language - Watch for confusion, frustration, or disengagement. Pause to check in: 'I see some concerned faces. What's troubling you about this?'",
+      "Time management - Keep visible timer. Give 2-minute warnings before moving to next inject.",
+      "Capture in real-time - Write gaps and action items on whiteboard immediately so participants see their input matters",
+      "Redirect circular discussions - If debate loops, summarize options and call for decision: 'We have 3 approaches. Let's vote.'",
+      "Embrace productive conflict - Healthy debate is good. Only intervene if it becomes personal or unproductive."
+    ],
+    "closingScript": "Thank you all for your engagement today. I'm really impressed by the thoughtful discussion and honest assessment of our capabilities.\n\nLet's transition now to our debrief. We're going to review what went well, what gaps we identified, and assign owners to action items. This is where we convert today's learning into real improvements.\n\nRemember, the point of this exercise wasn't to have all the answers - it was to find out where our gaps are before we face a real incident. By identifying these issues today in a safe environment, we're much better prepared for when - not if - something like this happens for real.",
+    "troubleshooting": [
+      {
+        "issue": "Team completely stuck, no one responding",
+        "solution": "Provide a gentle prompt: 'Let me give you a starting point. If you saw this WAF alert, what would be your very first action - who would you call or what system would you check?' If still stuck, provide hint from inject's 'fallback' guidance."
+      },
+      {
+        "issue": "Team solves scenario too quickly (making assumptions)",
+        "solution": "Challenge their assumptions: 'That's one approach. What if X factor you didn't consider?' or reveal additional complication from conditional responses. Make them work through the messiness."
+      },
+      {
+        "issue": "Discussion goes completely off-track",
+        "solution": "Politely interrupt: 'That's an important topic. Let me add it to our parking lot for the debrief. For now, we need to stay focused on the immediate incident at T+30 minutes.' Redirect to next inject."
+      },
+      {
+        "issue": "Participant makes obviously wrong decision that would be catastrophic",
+        "solution": "Don't immediately correct. Let the group discuss. If no one catches it, use Socratic questioning: 'Walk me through what happens next if you delete that IAM role...' Let them discover the problem."
+      },
+      {
+        "issue": "Tension or conflict between participants",
+        "solution": "Acknowledge both perspectives: 'I hear two valid concerns - security vs. business continuity. Both matter. How do we balance these in our decision framework?' Reframe as process gap: 'Sounds like we need clearer decision criteria for these trade-offs.'"
+      },
+      {
+        "issue": "Key decision-maker (CISO, VP) is absent",
+        "solution": "Have someone role-play that position: 'Tom, can you put on the CISO hat for this discussion?' This reveals whether team knows leader's decision criteria or if too much depends on one person."
+      },
+      {
+        "issue": "Participants want to fix issues during exercise",
+        "solution": "Redirect to capture for later: 'Great idea. Let's document that as an action item for after the exercise. For now, let's continue with the scenario as-is so we can identify all the gaps.'"
+      }
+    ]
+  },
+
+  "timelineEvents": [
+    {
+      "time": "T+0",
+      "title": "SSRF Vulnerability Discovery",
+      "description": "AWS WAF generates alert for suspicious request pattern. Request contains AWS metadata service IP (169.254.169.254) in image_url parameter. WAF rule is in detection-only mode and allows request through.",
+      "severity": "high",
+      "impact": "Security team has opportunity for early detection if logs are monitored"
+    },
+    {
+      "time": "T+15",
+      "title": "IAM Credential Theft Confirmed",
+      "description": "Application debug logs reveal successful metadata service access. Server fetched IAM role credentials and returned them to attacker in API response. Role provides S3 read access to customer data bucket.",
+      "severity": "critical",
+      "impact": "Attacker now has valid AWS credentials with 6-hour expiration. Can access customer data in S3"
+    },
+    {
+      "time": "T+30",
+      "title": "Data Exfiltration Begins",
+      "description": "CloudTrail shows S3 API calls (ListBucket, GetObject) from external IP 203.0.113.42. Total of 2,347 files accessed from company-customer-data bucket. 8.4 GB data transferred over 30 minutes.",
+      "severity": "critical",
+      "impact": "Data breach in progress. 500K+ customer records including PII (names, emails, addresses, encrypted payment tokens) exfiltrated"
+    },
+    {
+      "time": "T+45",
+      "title": "Containment Decision Point",
+      "description": "Security team must decide between immediate application shutdown vs. WAF blocking vs. patch-first approach. Each option has trade-offs for business continuity and security.",
+      "severity": "high",
+      "impact": "Decision determines scope of further compromise and revenue impact ($50K/hour if site is down)"
+    },
+    {
+      "time": "T+60",
+      "title": "Media Inquiry - External Pressure",
+      "description": "Journalist from TechCrunch contacts company about reported breach. Claims anonymous tip about customer data theft from AWS. Requests statement for article publishing in 1 hour.",
+      "severity": "medium",
+      "impact": "Tests external communication procedures. Unauthorized statements could worsen PR damage"
+    },
+    {
+      "time": "T+75",
+      "title": "Destructive Actions - Object Deletion",
+      "description": "GuardDuty alert: Unusual S3 DeleteObject activity. Attacker deleted 12,450 product images from company-product-images bucket. Email received with ransom demand (50 BTC) threatening to delete customer data next.",
+      "severity": "critical",
+      "impact": "Service disruption (missing product images). Potential data loss if S3 versioning not enabled. Ransomware escalation threat"
+    },
+    {
+      "time": "T+90",
+      "title": "Root Cause Identified",
+      "description": "Forensic investigation identifies SSRF vulnerability in image resize endpoint. No URL validation, IMDSv1 accessible, application returns full response body to user. Vulnerability existed for 6+ months.",
+      "severity": "high",
+      "impact": "Root cause understanding enables proper remediation. Reveals need for SAST tools and secure coding practices"
+    }
+  ],
+
+  "objectives": [
+    {
+      "number": 1,
+      "title": "Test SSRF Detection and Response Procedures",
+      "description": "Evaluate the team's ability to identify SSRF vulnerabilities from WAF alerts and application logs, then execute appropriate containment procedures.",
+      "successCriteria": [
+        "SSRF vulnerability recognized within 30 minutes of initial alert",
+        "Containment decision made with clear rationale and stakeholder alignment",
+        "Application security team engaged for emergency patching within 1 hour",
+        "WAF configuration reviewed and updated to block mode for critical rules"
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Validate AWS Credential Rotation Procedures",
+      "description": "Test procedures for rapidly revoking compromised IAM credentials and preventing further unauthorized access to AWS resources.",
+      "successCriteria": [
+        "IAM role credentials revoked within 15 minutes via deny policy attachment",
+        "Blast radius assessment completed identifying all accessible resources",
+        "CloudTrail forensic analysis performed to identify attacker actions",
+        "All affected S3 objects and resources documented"
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Assess Cloud Security Monitoring Capabilities",
+      "description": "Evaluate effectiveness of CloudTrail logging, GuardDuty alerts, and S3 access monitoring in detecting and responding to credential abuse.",
+      "successCriteria": [
+        "Data exfiltration detected from CloudTrail logs within 20 minutes",
+        "GuardDuty findings reviewed and acted upon appropriately",
+        "S3 access patterns analyzed to determine scope of data accessed",
+        "Network-based indicators (external IPs) correlated with threat intelligence"
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Identify Gaps in Cloud IAM Practices",
+      "description": "Discover missing procedures, policies, and technical controls related to AWS security and application security.",
+      "successCriteria": [
+        "Minimum 5 critical/high-priority SOPs identified as missing or inadequate",
+        "IMDSv2 enforcement gap identified as root cause enabler",
+        "Application security testing (SAST/DAST) gaps documented",
+        "Action items assigned with owners and deadlines for remediation"
+      ]
+    }
+  ],
+
+  "injects": [
+    {
+      "id": "SSRF-DISCOVER-001",
+      "time": "T+0",
+      "title": "AWS WAF Alert - Suspicious URL Parameter Pattern",
+      "severity": "high",
+      "scenario": "AWS WAF detects multiple requests with AWS metadata service IP address (169.254.169.254) in the image_url parameter of your image resize API. The WAF rule 'Suspicious URL Parameter Pattern' is currently in detection-only mode and allowed the requests through with a 200 OK response.",
+      "artifact": "POST /api/v1/images/resize HTTP/1.1\nHost: api.company.com\nContent-Type: application/json\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nX-Forwarded-For: 203.0.113.42\n\n{\n  \"image_url\": \"http://169.254.169.254/latest/meta-data/iam/security-credentials/\",\n  \"width\": 800,\n  \"height\": 600\n}\n\nResponse: 200 OK\nBody: webapp-production-role",
+      "expectedResponse": "Security team recognizes SSRF attempt targeting AWS metadata service. Team investigates application logs for successful exploitation and checks CloudTrail for unusual IAM credential usage from external IPs.",
+      "discussionQuestions": [
+        "What is 169.254.169.254 and why is it significant in AWS environments?",
+        "Should your WAF be in block mode or detection-only mode for this type of rule?",
+        "What logs would you check first to determine if this SSRF attempt was successful?",
+        "How quickly can you patch this vulnerability vs. implementing WAF blocking?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "What logs should we check?",
+          "response": "Application logs show 15 similar requests over the past 30 minutes, all returning 200 OK responses with JSON data (not image data). The response bodies contain AWS credential information including AccessKeyId and SecretAccessKey."
+        },
+        {
+          "trigger": "What's the attacker's IP address?",
+          "response": "Source IP is 203.0.113.42. WHOIS shows it belongs to a hosting provider in Eastern Europe. No prior legitimate traffic from this IP address in your logs."
+        }
+      ],
+      "facilitatorNotes": {
+        "setup": "This is the opening inject that sets the stage. Most participants may not immediately recognize 169.254.169.254 as the AWS metadata service. That's okay - discovering knowledge gaps is part of the learning.",
+        "delivery": "Display the HTTP request artifact clearly on screen. Read the scenario aloud, emphasizing the key details: WAF detected the pattern but allowed it through (detection-only mode), and the requests contained the metadata service IP. Give participants 30 seconds to read the artifact, then ask the first discussion question.",
+        "expectedTime": "15-20 minutes",
+        "keyPoints": [
+          "169.254.169.254 is the AWS EC2 metadata service - accessible from any EC2 instance",
+          "SSRF vulnerabilities allow attackers to make server make requests to internal resources",
+          "Detection-only WAF mode means attacks get through but are logged",
+          "The artifact shows a 200 OK response - this is a red flag that the attack succeeded",
+          "The response body shows an IAM role name, confirming metadata service access"
+        ],
+        "redFlags": [
+          "Team doesn't recognize 169.254.169.254 as AWS metadata service",
+          "Team doesn't understand severity - treats as normal security alert",
+          "No one mentions checking application logs for successful exploitation",
+          "Team wants to wait for more information instead of investigating immediately",
+          "No discussion of immediate containment (WAF blocking, credential rotation)"
+        ],
+        "hints": [
+          "If team doesn't recognize IP: 'That IP address 169.254.169.254 is special in cloud environments. Anyone know what it's used for in AWS?'",
+          "If missing severity: 'Notice the HTTP response shows webapp-production-role in the body. What does that tell you about whether this attack succeeded?'",
+          "If no containment discussion: 'The WAF is in detection mode, so these requests are still getting through right now. What's your immediate action?'"
+        ],
+        "successIndicators": [
+          "At least one person identifies 169.254.169.254 as AWS metadata service",
+          "Team recognizes this as SSRF vulnerability",
+          "Discussion includes checking application logs and CloudTrail",
+          "Someone mentions immediate containment options (WAF block, credential rotation)",
+          "Team debates detection-only vs. block mode for WAF rules"
+        ],
+        "transition": "Once the team has identified this as SSRF and discussed initial investigation steps, transition with: 'Okay, your team begins investigating. Let me share what you find in the application logs...'"
+      }
+    },
+    {
+      "id": "SSRF-EXPLOIT-001",
+      "time": "T+15",
+      "title": "Application Logs Show Metadata Service Access",
+      "severity": "critical",
+      "scenario": "Application debug logs reveal that the backend server successfully fetched IAM role credentials from the metadata service and returned them to the attacker in the HTTP response. The compromised IAM role has S3 read permissions.",
+      "artifact": "[2026-02-06 10:15:23] INFO: Image resize request received\n  image_url: http://169.254.169.254/latest/meta-data/iam/security-credentials/webapp-production-role\n  \n[2026-02-06 10:15:24] DEBUG: HTTP GET http://169.254.169.254/.../webapp-production-role\n  Response Status: 200\n  Response Body: {\n    \"Code\": \"Success\",\n    \"Type\": \"AWS-HMAC\",\n    \"AccessKeyId\": \"ASIA...[redacted]\",\n    \"SecretAccessKey\": \"[redacted]\",\n    \"Token\": \"[redacted]\",\n    \"Expiration\": \"2026-02-06T16:00:00Z\"\n  }",
+      "expectedResponse": "Team confirms IAM credential theft. Security team investigates the compromised role's permissions by reviewing IAM policies. Team initiates credential rotation procedures and checks CloudTrail for evidence of credential abuse.",
+      "discussionQuestions": [
+        "The attacker now has temporary AWS credentials. What can they do with these?",
+        "How would you determine what permissions this IAM role has?",
+        "What's your immediate containment action - revoke credentials or shut down application?",
+        "How long are these credentials valid for?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "What permissions does this role have?",
+          "response": "IAM role policy grants: S3 GetObject/PutObject/ListBucket on company-product-images bucket, S3 GetObject/ListBucket on company-customer-data bucket, EC2 DescribeInstances, DescribeSecurityGroups. The role has READ access to your customer data S3 bucket."
+        },
+        {
+          "trigger": "How do we revoke these credentials?",
+          "response": "Options: 1) Attach explicit deny policy to IAM role (immediate, ~60 seconds to propagate), 2) Modify role trust policy to require specific source IP/VPC, 3) Delete IAM role (breaks production app), 4) Terminate EC2 instances to force credential refresh (causes outage)."
+        }
+      ]
+    },
+    {
+      "id": "CLOUDTRAIL-ABUSE-001",
+      "time": "T+30",
+      "title": "CloudTrail Shows Credential Abuse from External IP",
+      "severity": "critical",
+      "scenario": "CloudTrail logs reveal the stolen IAM credentials are being used from external IP 203.0.113.42 (not your EC2 IP ranges). Attacker performed S3 ListBucket followed by mass GetObject requests downloading 2,347 files totaling 8.4 GB from customer data bucket.",
+      "expectedResponse": "Team recognizes credentials are being used externally. Identifies 8.4 GB customer data exfiltration in progress. Initiates emergency credential revocation via deny policy. Begins forensic investigation to determine exactly what data was accessed. Discusses data breach notification requirements.",
+      "discussionQuestions": [
+        "How do you immediately stop the attacker from using these stolen credentials?",
+        "What customer data was in those 2,347 CSV files that were downloaded?",
+        "Do you have data breach notification requirements under GDPR, CCPA, or other regulations?",
+        "How do you detect large data transfers out of S3 in the future?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "What data was stolen?",
+          "response": "S3 access logs show files accessed include: customers_profile_data_2024.csv (500K records with names, emails, addresses, phone numbers), payment_methods_encrypted.csv (200K records with encrypted payment tokens), order_history_2024_Q4.csv (1.2M order records). Total: 500K+ unique customers affected."
+        },
+        {
+          "trigger": "What are our legal notification requirements?",
+          "response": "General Counsel advises: Under GDPR you have 72 hours to notify EU data protection authorities. Under California CCPA you must notify affected residents without unreasonable delay. Encrypted payment tokens may not require notification if encryption keys weren't stolen. But PII (names, emails, addresses) definitely requires customer notification."
+        }
+      ],
+      "facilitatorNotes": {
+        "setup": "This is the pivotal moment where the incident escalates from 'potential compromise' to 'confirmed data breach.' The team must shift from investigation to crisis management mode. Be prepared for emotional reactions - data breaches are serious and participants may feel the gravity.",
+        "delivery": "Present the CloudTrail findings matter-of-factly. Display the file download statistics prominently: 2,347 files, 8.4 GB, external IP. Pause after presenting to let the weight sink in. Then ask: 'The attacker has been exfiltrating your customer data for the past 30 minutes. What's your immediate action?'",
+        "expectedTime": "15-20 minutes (may run longer due to breach notification discussion)",
+        "keyPoints": [
+          "This is now a confirmed data breach, not just a security incident",
+          "8.4 GB of customer data has already been stolen - containment is urgent",
+          "The external IP (203.0.113.42) proves credentials are being used outside your infrastructure",
+          "GDPR/CCPA notification timelines start NOW (72 hours for GDPR)",
+          "Every minute of delay means potentially more data stolen",
+          "Forensic preservation is critical - don't delete logs trying to 'clean up'"
+        ],
+        "redFlags": [
+          "Team doesn't immediately move to revoke credentials - still discussing/debating",
+          "No mention of legal/compliance team engagement for breach notification",
+          "Team wants to 'monitor' the attacker instead of immediately containing",
+          "No discussion of what data was actually stolen (assuming it's encrypted/safe)",
+          "Team discusses technical response but ignores business/legal implications",
+          "No one asks about regulatory notification requirements"
+        ],
+        "hints": [
+          "If no immediate containment action: 'While we're discussing this, the attacker is still actively downloading files. What can you do RIGHT NOW to stop them?'",
+          "If missing legal angle: 'Your General Counsel just heard about 8.4 GB customer data download. They're walking into the room. What questions will they ask you?'",
+          "If underestimating impact: 'Those 2,347 CSV files contain customer names, emails, addresses, phone numbers. Is that personally identifiable information under GDPR?'"
+        ],
+        "successIndicators": [
+          "Team immediately discusses credential revocation methods",
+          "Someone mentions engaging Legal/Compliance team",
+          "Discussion includes determining exactly what data was in those files",
+          "Team recognizes GDPR 72-hour notification timeline",
+          "Someone asks about preserving evidence for forensics",
+          "Discussion of customer impact and notification planning begins"
+        ],
+        "transition": "After documenting the breach scope and initial containment plans, transition with: 'Your security team has initiated credential revocation. But now you face a critical decision about how to fully contain this incident...'"
+      }
+    },
+    {
+      "id": "CONTAINMENT-DECISION-001",
+      "time": "T+45",
+      "title": "Critical Containment Decision Required",
+      "severity": "high",
+      "scenario": "Security team must make immediate decision on containment strategy. Options: A) Shutdown application immediately (stops exploitation but costs $50K/hour in revenue), B) WAF block + IAM deny policy (keeps app online but attacker could change IP), C) Patch application first then rotate (2-4 hour delay but fixes root cause).",
+      "expectedResponse": "Team debates risk vs. business impact. Makes containment decision with clear rationale. Assigns responsibilities for execution. Discusses customer notification timing. Begins coordination with Legal and PR teams.",
+      "discussionQuestions": [
+        "What factors influence your containment decision?",
+        "Who has authority to make the call on taking the site offline?",
+        "How do you balance security response with business continuity?",
+        "What happens if you choose WAF blocking but the attacker changes IP addresses?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "We choose WAF block + deny policy",
+          "response": "You attach deny policy to IAM role. CloudTrail shows API calls from 203.0.113.42 stop immediately. WAF rule added blocking that IP. 5 minutes later... new WAF alert shows SSRF attempts from different IP: 198.51.100.99. Attacker changed IP address. Do you block this one too or take more drastic action?"
+        },
+        {
+          "trigger": "We choose to shut down the application",
+          "response": "Application taken offline. All EC2 instances terminated forcing IAM credential refresh. SSRF exploitation stops immediately. Business team estimates $200K lost revenue during 4-hour emergency patch and deployment. Customer support receiving complaints about site being down. How do you communicate this externally?"
+        }
+      ]
+    },
+    {
+      "id": "MEDIA-INQUIRY-001",
+      "time": "T+60",
+      "title": "TechCrunch Journalist Inquiry",
+      "severity": "medium",
+      "scenario": "Journalist calls company main line: 'Hi, this is Alex Chen from TechCrunch. We received an anonymous tip that your company had a security breach and customer data was stolen from AWS. Someone posted screenshots on Twitter of what appears to be your customer database files. Can you confirm the breach? How many customer records were exposed? Was payment information stolen? I'm publishing a story in the next hour. Do you have a statement?'",
+      "expectedResponse": "Receptionist routes to PR/Communications team per media inquiry procedures. PR coordinates with Legal and Security before providing any statement. No unauthorized comments made. Prepared holding statement provided if appropriate.",
+      "discussionQuestions": [
+        "Who in your organization has authority to speak to media about security incidents?",
+        "What information can/should you share at this stage of the investigation?",
+        "How do you verify this is a real journalist and not social engineering?",
+        "What happens if an employee makes unauthorized statements to the press?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "We provide no comment",
+          "response": "Journalist publishes article anyway with headline: '[Company] Refuses to Comment on Reported Customer Data Breach'. Article includes leaked screenshots. Customers tweeting asking if their data was stolen. Support queue has 500+ tickets. Stock price drops 8%. Board of Directors requesting emergency briefing."
+        },
+        {
+          "trigger": "We provide prepared statement",
+          "response": "PR provides: 'We are aware of a security incident affecting our systems. We are investigating and will provide updates to affected customers as appropriate. Customer security is our top priority.' Journalist asks follow-up: 'Can you confirm customer data was stolen?' How do you respond?"
+        }
+      ]
+    },
+    {
+      "id": "GUARDDUTY-ESCALATION-001",
+      "time": "T+75",
+      "title": "GuardDuty Alert - S3 Object Deletion",
+      "severity": "critical",
+      "scenario": "GuardDuty finding: 'Impact:S3/ObjectDelete.Unusual - An IAM principal invoked an API commonly used to delete data in an S3 bucket.' Attacker deleted 12,450 product images from company-product-images bucket using the compromised credentials. Email received at support@company.com with ransom demand: 50 BTC ($1.85M) or customer data will be deleted next.",
+      "expectedResponse": "Team recognizes destructive actions (not just exfiltration). Checks S3 versioning status to determine if objects can be restored. Reassesses attacker motivation (ransomware vs. sabotage). Discusses ransom payment policy with Legal and Finance.",
+      "discussionQuestions": [
+        "Why would the attacker delete product images?",
+        "Do you have S3 versioning enabled to restore these objects?",
+        "Is this a credible ransomware threat or an extortion attempt?",
+        "What's your organization's policy on paying ransoms?",
+        "Should you contact law enforcement at this point?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "Do we have S3 versioning enabled?",
+          "response": "Versioning is ENABLED on this bucket. Objects are soft-deleted (delete markers created). You can restore all 12,450 files but it will take 2-3 hours. Until then, product pages show broken image links impacting customer experience."
+        },
+        {
+          "trigger": "Should we pay the ransom?",
+          "response": "General Counsel: 'We have backups and can restore data. The attacker didn't encrypt anything, just deleted files. This appears to be an extortion attempt. FBI advises against paying ransoms as it funds criminal activity and there's no guarantee they won't publish the data anyway. However, this is ultimately a business decision.'"
+        }
+      ]
+    }
+  ],
+
+  "atomics": [
+    {
+      "id": "SETUP-SSRF-001",
+      "time": "T-60min",
+      "title": "Pre-Exercise Environment Setup",
+      "action": "Prepare all exercise materials, verify accessibility, and ensure runner familiarity with AWS console navigation and CloudTrail logs.",
+      "commands": "# Verify materials are accessible\nls /exercises/ssrf-aws-2024/\n# Should contain:\n# - cloudtrail-logs.json\n# - iam-policy.json  \n# - s3-access-logs.csv\n# - guardduty-screenshots/\n# - waf-alert-screenshot.png",
+      "commandLanguage": "bash",
+      "expectedResponse": "All materials staged and accessible. Runner ready to execute timed injects.",
+      "verification": [
+        "Staged materials accessible in /exercises/ssrf-aws-2024/",
+        "CloudTrail log excerpts ready to share",
+        "IAM policy documents available",
+        "GuardDuty alert screenshots prepared",
+        "Runner familiar with scenario flow and inject timing"
+      ]
+    },
+    {
+      "id": "SSRF-DISCOVER-001",
+      "time": "T+0",
+      "title": "Display WAF Alert",
+      "action": "Show AWS WAF console alert for suspicious request pattern containing metadata service IP. Read alert details aloud or show screenshot to participants.",
+      "expectedResponse": "Security team investigates WAF alert, checks application logs for SSRF exploitation evidence, begins CloudTrail review.",
+      "fallback": "If no response after 10 minutes, prompt: 'Your AWS WAF has detected suspicious patterns in your image resize API. Multiple requests contain the IP address 169.254.169.254. What does this indicate and what's your first step?'"
+    },
+    {
+      "id": "SSRF-EXPLOIT-001",
+      "time": "T+15",
+      "title": "Provide Application Log Evidence",
+      "action": "Share application log excerpt showing successful metadata service access and credential retrieval. Display the artifact showing AWS temporary credentials in API response.",
+      "expectedResponse": "Team confirms credential theft, reviews IAM role permissions, initiates credential rotation procedures, checks CloudTrail for abuse.",
+      "fallback": "If team doesn't recognize severity, prompt: 'These logs show your application server fetched AWS credentials from the metadata service and sent them to the attacker in the HTTP response. The attacker now has valid AWS credentials. What can they access?'"
+    },
+    {
+      "id": "CLOUDTRAIL-ABUSE-001",
+      "time": "T+30",
+      "title": "Display CloudTrail Findings",
+      "action": "Show CloudTrail logs or GuardDuty alert indicating API calls from external IP 203.0.113.42. Highlight S3 ListBucket and GetObject calls totaling 8.4 GB data transfer.",
+      "commands": "# If using actual CloudTrail logs:\ncat /exercises/ssrf-aws-2024/cloudtrail-logs.json | jq '.Records[] | select(.sourceIPAddress==\"203.0.113.42\")'\n\n# Show data exfiltration summary:\necho 'S3 API Calls from 203.0.113.42:'\necho 'ListBucket (company-customer-data): 12 calls'\necho 'GetObject: 2,347 calls'\necho 'Total data transferred: 8.4 GB'\necho 'Duration: 30 minutes'",
+      "commandLanguage": "bash",
+      "expectedResponse": "Team recognizes external credential usage, identifies data exfiltration, revokes credentials via deny policy, begins forensic investigation.",
+      "fallback": "If team is slow to respond, prompt: 'CloudTrail shows 8.4 GB of customer data was just downloaded from your S3 bucket by an external IP using your IAM credentials. How do you stop this immediately?'"
+    },
+    {
+      "id": "CONTAINMENT-DECISION-001",
+      "time": "T+45",
+      "title": "Force Containment Decision",
+      "action": "Present three containment options with trade-offs. Role-play DevOps (wants to patch first), Business (concerned about revenue), and Legal (wants immediate action). Force team to make a decision within 5 minutes.",
+      "expectedResponse": "Team debates options, makes decision with clear rationale, assigns action items, begins execution of chosen strategy.",
+      "fallback": "If discussion stalls, prompt: 'You have 2 minutes to make a decision. The attacker is still actively exploring your AWS environment. What's your call?'",
+      "verification": [
+        "Decision made and clearly communicated",
+        "Rationale documented",
+        "Action items assigned to specific team members",
+        "Timeline for execution established"
+      ]
+    },
+    {
+      "id": "MEDIA-INQUIRY-001",
+      "time": "T+60",
+      "title": "Simulate Journalist Phone Call",
+      "action": "Runner role-plays journalist calling company main line. Ask specific questions about the breach. Note who responds and what information is shared.",
+      "expectedResponse": "Call routed to appropriate spokesperson. Prepared statement provided if available. No unauthorized disclosures made.",
+      "fallback": "If no media policy exists, runner states: 'The receptionist who answered told me: We had a small technical issue earlier but it's resolved. She forwarded me to your IT director. 30 minutes later, TechCrunch publishes article with quotes. What's your response?'"
+    },
+    {
+      "id": "GUARDDUTY-ESCALATION-001",
+      "time": "T+75",
+      "title": "Display GuardDuty Alert and Ransom Email",
+      "action": "Show GuardDuty finding for S3 DeleteObject activity. Then deliver ransom email to support inbox demanding 50 BTC or customer data will be deleted.",
+      "expectedResponse": "Team recognizes destructive actions, checks S3 versioning, discusses ransomware response, engages Legal on ransom payment decision.",
+      "fallback": "If team doesn't engage with ransom demand, prompt: 'Legal is asking: Do we pay the ransom? Finance wants to know: Can we restore the data without paying? What's your recommendation?'"
+    }
+  ],
+
+  "gapStats": {
+    "critical": 3,
+    "high": 4,
+    "medium": 3,
+    "low": 2
+  },
+
+  "gaps": [
+    {
+      "priority": "critical",
+      "title": "SSRF Vulnerability Response Playbook",
+      "status": "MISSING",
+      "trigger": "WAF alert for AWS metadata service access patterns (169.254.169.254)",
+      "requiredProcedures": [
+        "SSRF identification and validation procedures",
+        "Application containment decision tree (shutdown vs. WAF block vs. patch-first)",
+        "AWS credential rotation for compromised IAM roles",
+        "Blast radius assessment (what resources can compromised role access)",
+        "Emergency application patching procedures and SLAs"
+      ],
+      "impact": "Delayed containment, continued credential abuse, extended attacker access window, broader cloud infrastructure compromise",
+      "recommendation": "Develop comprehensive SSRF incident response playbook covering detection indicators (metadata service IPs, localhost requests, internal network access), immediate containment options with decision criteria, IAM credential rotation procedures with automation scripts, application security team notification workflows, and post-incident remediation including IMDSv2 enforcement and SAST tool deployment."
+    },
+    {
+      "priority": "critical",
+      "title": "AWS IAM Credential Compromise Response",
+      "status": "INADEQUATE",
+      "trigger": "CloudTrail shows API calls from unauthorized IP addresses using valid credentials",
+      "requiredProcedures": [
+        "Immediate credential revocation methods (attach deny policy vs. role deletion vs. instance termination)",
+        "Blast radius assessment for compromised IAM roles",
+        "CloudTrail forensic analysis procedures and query templates",
+        "Affected resource identification (enumerate all resources accessed by attacker)",
+        "Automated credential rotation without service disruption"
+      ],
+      "impact": "Extended attacker access window (6+ hours if credentials not revoked), broader compromise of AWS resources, difficulty determining scope of breach",
+      "recommendation": "Create comprehensive AWS credential compromise playbook with step-by-step revocation procedures (with AWS console screenshots), pre-built CloudTrail query templates for common attack patterns, IAM policy templates for emergency deny-all policies, S3 access log analysis procedures, and automated credential rotation scripts callable via incident response platform."
+    },
+    {
+      "priority": "critical",
+      "title": "Data Breach Notification Procedures",
+      "status": "MISSING",
+      "trigger": "500K+ customer records exfiltrated from S3 containing PII",
+      "requiredProcedures": [
+        "Data breach assessment criteria (when is notification legally required)",
+        "Legal and compliance team notification procedures",
+        "Customer notification templates and delivery timelines",
+        "Regulatory notification procedures (state AGs, GDPR DPAs, industry regulators)",
+        "Internal stakeholder communication (executives, board, PR, customer support)",
+        "Credit monitoring and identity theft protection vendor coordination"
+      ],
+      "impact": "Regulatory non-compliance, potential GDPR fines (up to 4% of annual revenue), state-level fines, class-action lawsuits, loss of customer trust",
+      "recommendation": "Develop data breach response playbook covering breach assessment decision tree with notification thresholds, 72-hour GDPR timeline tracker with milestones, customer notification templates (email, website, call center scripts), regulatory notification contact list with submission procedures, credit monitoring vendor pre-negotiated contracts, and post-breach customer support escalation procedures."
+    },
+    {
+      "priority": "high",
+      "title": "S3 Data Exfiltration Detection and Prevention",
+      "status": "INADEQUATE",
+      "trigger": "8.4 GB transferred from S3 before detection",
+      "requiredProcedures": [
+        "Real-time S3 access monitoring with automated alerting",
+        "S3 access pattern baseline (normal vs. anomalous behavior)",
+        "Automated response to mass download events (alert SOC, block IP, revoke credentials)",
+        "S3 bucket policies restricting access by source IP/VPC endpoint",
+        "S3 Object Lock for immutable data retention"
+      ],
+      "impact": "Late detection of data exfiltration, difficulty determining full scope of breach, inability to stop theft in progress",
+      "recommendation": "Deploy S3 access logging with CloudWatch integration and real-time alerts for unusual API call volumes. Configure S3 bucket policies requiring VPC endpoint access. Implement S3 Object Lock for critical customer data. Create automated SOAR playbook to revoke credentials when exfiltration detected. Establish S3 access baselines using CloudWatch Insights."
+    },
+    {
+      "priority": "high",
+      "title": "Application Security Testing (SAST/DAST)",
+      "status": "MISSING",
+      "trigger": "SSRF vulnerability in production code, no pre-deployment detection",
+      "requiredProcedures": [
+        "SAST tools in CI/CD pipeline scanning for injection vulnerabilities",
+        "DAST or IAST testing for SSRF, SQLi, XSS in staging environment",
+        "Security code review procedures for external-facing APIs",
+        "Secure coding training for developers (OWASP Top 10 focus)",
+        "Vulnerability disclosure and emergency patching workflows"
+      ],
+      "impact": "Critical vulnerabilities deployed to production undetected, reactive security posture, emergency patching disrupts business",
+      "recommendation": "Implement SAST tool (Semgrep, Checkmarx, or Snyk Code) in CI/CD pipeline with build-breaking rules for high-severity findings. Add DAST scanning to staging environment using Burp Suite or OWASP ZAP. Require security code review for all external-facing API changes. Provide quarterly OWASP Top 10 training for developers with hands-on vulnerable lab exercises."
+    },
+    {
+      "priority": "high",
+      "title": "Media and External Communication Procedures",
+      "status": "PARTIAL",
+      "trigger": "Journalist inquiry about data breach",
+      "requiredProcedures": [
+        "Media inquiry response procedures and routing",
+        "Authorized spokesperson list with contact information",
+        "Holding statement templates for active incidents",
+        "Social media monitoring during security incidents",
+        "Customer support escalation and FAQ preparation"
+      ],
+      "impact": "Inconsistent messaging, unauthorized disclosures, PR damage amplification, stock price impact, customer confusion",
+      "recommendation": "Develop incident communication playbook with media inquiry routing procedures, pre-approved holding statements for different incident types, decision tree for when to proactively disclose vs. respond to inquiries, social media monitoring alerts for company mentions during incidents, and customer support FAQ templates for common breach questions."
+    },
+    {
+      "priority": "high",
+      "title": "AWS Security Baseline Compliance",
+      "status": "INADEQUATE",
+      "trigger": "IMDSv1 enabled (allowed SSRF exploitation), S3 versioning gaps",
+      "requiredProcedures": [
+        "IMDSv2 enforcement for all EC2 instances (prevents SSRF metadata access)",
+        "S3 versioning enabled on all critical data buckets",
+        "CloudTrail log file integrity validation",
+        "IAM role session duration limits (reduce credential lifetime)",
+        "VPC endpoints for AWS services (prevent SSRF to AWS APIs)"
+      ],
+      "impact": "SSRF attacks can access metadata service, accidental/malicious data deletion unrecoverable, credential theft impact window extended",
+      "recommendation": "Conduct AWS security baseline audit using AWS Security Hub or Prowler. Immediately enforce IMDSv2 requirement for all EC2 instances. Enable S3 versioning with Object Lock for critical data. Reduce IAM session duration from default 6 hours to 1 hour. Deploy VPC endpoints for S3, EC2, and other services to prevent SSRF attacks from reaching AWS APIs."
+    },
+    {
+      "priority": "medium",
+      "title": "WAF Configuration and Tuning",
+      "status": "INADEQUATE",
+      "trigger": "Critical WAF rules in detection-only mode instead of block mode",
+      "requiredProcedures": [
+        "WAF rule review and mode management (detection vs. block)",
+        "False positive analysis and tuning procedures",
+        "WAF alert prioritization and response workflows",
+        "Regular WAF effectiveness reviews"
+      ],
+      "impact": "Known attack patterns allowed through to application, delayed attack detection",
+      "recommendation": "Review all AWS WAF rules and move critical rules (SSRF, SQLi, XSS patterns) from detection to block mode. Implement 30-day detection period for new rules before blocking. Create WAF alert response procedures with severity-based SLAs. Schedule quarterly WAF effectiveness reviews."
+    },
+    {
+      "priority": "medium",
+      "title": "CloudTrail Forensic Analysis Capability",
+      "status": "LIMITED",
+      "trigger": "Manual log review required, no pre-built queries or automation",
+      "requiredProcedures": [
+        "CloudTrail query templates for common attack patterns",
+        "Automated CloudTrail analysis tools and scripts",
+        "CloudTrail log aggregation and search platform",
+        "Training for SOC analysts on CloudTrail forensics"
+      ],
+      "impact": "Slow forensic investigation, incomplete understanding of attacker actions, difficulty determining breach scope",
+      "recommendation": "Create library of CloudTrail query templates for common scenarios (credential abuse, data exfiltration, privilege escalation). Deploy CloudTrail logs to centralized SIEM or CloudWatch Insights. Build automated analysis scripts for rapid breach scope determination. Provide CloudTrail forensics training to SOC team."
+    },
+    {
+      "priority": "medium",
+      "title": "Incident Response - Business Continuity Coordination",
+      "status": "UNCLEAR",
+      "trigger": "Confusion about authority to take application offline ($50K/hour impact)",
+      "requiredProcedures": [
+        "Incident commander authority matrix (who can approve business-impacting actions)",
+        "Revenue impact estimation procedures for service disruptions",
+        "Business continuity coordination workflows during security incidents",
+        "Executive escalation thresholds and notification procedures"
+      ],
+      "impact": "Delayed critical decisions, unclear accountability, uncoordinated response affecting business operations",
+      "recommendation": "Define incident commander role with clear authority levels for different impact tiers. Document decision authority for business-impacting actions (e.g., CISO can approve up to 2-hour outage, CEO approval required beyond that). Create revenue impact calculator for common scenarios. Establish executive notification thresholds and briefing templates."
+    },
+    {
+      "priority": "low",
+      "title": "Vendor Security Incident Coordination",
+      "status": "MISSING",
+      "trigger": "No procedures for notifying cloud provider or other vendors during incidents",
+      "requiredProcedures": [
+        "AWS security incident coordination procedures",
+        "Vendor notification thresholds and timing",
+        "Third-party incident response vendor contacts (forensics, legal, PR)",
+        "Cyber insurance notification and claim procedures"
+      ],
+      "impact": "Missed opportunity for vendor assistance, contractual violations, delayed insurance claims",
+      "recommendation": "Document AWS support channels for security incidents (AWS Support, AWS Abuse team). Create vendor notification decision tree. Maintain list of pre-approved incident response vendors (forensics firm, breach coach law firm, PR crisis firm). Document cyber insurance notification requirements and claim procedures with policy details."
+    },
+    {
+      "priority": "low",
+      "title": "Post-Incident Review and Lessons Learned",
+      "status": "INFORMAL",
+      "trigger": "No formal post-incident review process",
+      "requiredProcedures": [
+        "Post-incident review meeting scheduling and facilitation",
+        "Lessons learned documentation format",
+        "Action item tracking and accountability",
+        "Incident pattern analysis and trend identification"
+      ],
+      "impact": "Repeated incidents due to same root causes, failure to learn from experience",
+      "recommendation": "Implement formal post-incident review process within 5 business days of incident closure. Use structured format covering timeline, root cause, response effectiveness, and improvement actions. Track action items like project deliverables with owners and deadlines. Conduct quarterly incident trend analysis to identify systemic issues."
+    }
+  ]
+}

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - Cybersecurity Tabletop Exercise</title>
+    <link rel="stylesheet" href="../styles/print.css">
+    <style>
+        /* Inline critical styles for PDF rendering */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #64748b;
+            --accent: #0ea5e9;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --dark: #0f172a;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-700: #334155;
+            --gray-900: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cover Page -->
+    <section class="cover-page">
+        <div class="cover-header">
+            <div class="company-logo">
+                <!-- Client logo would go here -->
+                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="60" height="60" rx="12" fill="var(--primary)"/>
+                    <path d="M20 30L27 37L40 23" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="cover-content">
+            <div class="document-type">CYBERSECURITY TABLETOP EXERCISE</div>
+            <h1 class="cover-title">{{title}}</h1>
+            <div class="cover-subtitle">{{subtitle}}</div>
+
+            <div class="cover-metadata">
+                <div class="metadata-grid">
+                    <div class="metadata-item">
+                        <span class="metadata-label">Scenario Type</span>
+                        <span class="metadata-value">{{scenarioType}}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Target Audience</span>
+                        <span class="metadata-value">{{targetAudience}}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Duration</span>
+                        <span class="metadata-value">{{duration}}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Difficulty</span>
+                        <span class="metadata-value">{{difficulty}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="severity-badge {{severityClass}}">
+                <span class="severity-icon">⚠️</span>
+                <span class="severity-text">{{severity}} SEVERITY SCENARIO</span>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div class="prepared-by">
+                Prepared by: {{preparedBy}}<br>
+                Date: {{date}}<br>
+                Version: {{version}}
+            </div>
+            <div class="confidential-notice">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 1a3 3 0 0 0-3 3v1H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-1V4a3 3 0 0 0-3-3zm2 4V4a2 2 0 1 0-4 0v1h4z"/>
+                </svg>
+                CONFIDENTIAL - FOR INTERNAL USE ONLY
+            </div>
+        </div>
+    </section>
+
+    <!-- Table of Contents -->
+    <section class="toc-page">
+        <h2 class="section-title">Table of Contents</h2>
+        <nav class="toc">
+            <ul class="toc-list">
+                <li class="toc-item toc-level-1">
+                    <a href="#executive-summary">
+                        <span class="toc-number">1</span>
+                        <span class="toc-text">Executive Summary</span>
+                        <span class="toc-page">3</span>
+                    </a>
+                </li>
+                <li class="toc-item toc-level-1">
+                    <a href="#scenario-overview">
+                        <span class="toc-number">2</span>
+                        <span class="toc-text">Scenario Overview</span>
+                        <span class="toc-page">4</span>
+                    </a>
+                    <ul class="toc-sublist">
+                        <li class="toc-item toc-level-2">
+                            <a href="#initial-conditions">
+                                <span class="toc-text">2.1 Initial Conditions</span>
+                                <span class="toc-page">4</span>
+                            </a>
+                        </li>
+                        <li class="toc-item toc-level-2">
+                            <a href="#threat-actor">
+                                <span class="toc-text">2.2 Threat Actor Profile</span>
+                                <span class="toc-page">5</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="toc-item toc-level-1">
+                    <a href="#exercise-objectives">
+                        <span class="toc-number">3</span>
+                        <span class="toc-text">Exercise Objectives</span>
+                        <span class="toc-page">6</span>
+                    </a>
+                </li>
+                <li class="toc-item toc-level-1">
+                    <a href="#facilitator-guide">
+                        <span class="toc-number">4</span>
+                        <span class="toc-text">Facilitator Guide</span>
+                        <span class="toc-page">7</span>
+                    </a>
+                </li>
+                <li class="toc-item toc-level-1">
+                    <a href="#atomics-runbook">
+                        <span class="toc-number">5</span>
+                        <span class="toc-text">Technical Atomics Runbook</span>
+                        <span class="toc-page">15</span>
+                    </a>
+                </li>
+                <li class="toc-item toc-level-1">
+                    <a href="#gap-analysis">
+                        <span class="toc-number">6</span>
+                        <span class="toc-text">SOP/Playbook Gap Analysis</span>
+                        <span class="toc-page">28</span>
+                    </a>
+                </li>
+                <li class="toc-item toc-level-1">
+                    <a href="#evaluation">
+                        <span class="toc-number">7</span>
+                        <span class="toc-text">Evaluation & Metrics</span>
+                        <span class="toc-page">35</span>
+                    </a>
+                </li>
+                <li class="toc-item toc-level-1">
+                    <a href="#appendix">
+                        <span class="toc-number">8</span>
+                        <span class="toc-text">Appendices</span>
+                        <span class="toc-page">38</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </section>
+
+    <!-- Executive Summary -->
+    <section class="content-section" id="executive-summary">
+        <div class="section-header">
+            <span class="section-number">01</span>
+            <h2 class="section-title">Executive Summary</h2>
+        </div>
+
+        <div class="summary-card">
+            <div class="card-content">
+                {{executiveSummary}}
+            </div>
+        </div>
+
+        <div class="key-points">
+            <h3 class="subsection-title">Key Points</h3>
+            <div class="points-grid">
+                <div class="point-card">
+                    <div class="point-icon" style="background: var(--primary);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="point-content">
+                        <h4>Attack Vector</h4>
+                        <p>{{attackVector}}</p>
+                    </div>
+                </div>
+
+                <div class="point-card">
+                    <div class="point-icon" style="background: var(--danger);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="point-content">
+                        <h4>Potential Impact</h4>
+                        <p>{{potentialImpact}}</p>
+                    </div>
+                </div>
+
+                <div class="point-card">
+                    <div class="point-icon" style="background: var(--success);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <div class="point-content">
+                        <h4>Testing Goals</h4>
+                        <p>{{testingGoals}}</p>
+                    </div>
+                </div>
+
+                <div class="point-card">
+                    <div class="point-icon" style="background: var(--warning);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <div class="point-content">
+                        <h4>Critical Gaps</h4>
+                        <p>{{criticalGaps}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scenario Overview -->
+    <section class="content-section" id="scenario-overview">
+        <div class="section-header">
+            <span class="section-number">02</span>
+            <h2 class="section-title">Scenario Overview</h2>
+        </div>
+
+        <div class="scenario-details">
+            {{scenarioOverview}}
+        </div>
+
+        <!-- Attack Chain Timeline -->
+        <div class="timeline-container">
+            <h3 class="subsection-title">Attack Chain Timeline</h3>
+            <div class="timeline">
+                {{#each timelineEvents}}
+                <div class="timeline-event {{this.severity}}">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-time">{{this.time}}</div>
+                        <div class="timeline-title">{{this.title}}</div>
+                        <div class="timeline-description">{{this.description}}</div>
+                        {{#if this.impact}}
+                        <div class="timeline-impact">
+                            <strong>Impact:</strong> {{this.impact}}
+                        </div>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </section>
+
+    <!-- Exercise Objectives -->
+    <section class="content-section" id="exercise-objectives">
+        <div class="section-header">
+            <span class="section-number">03</span>
+            <h2 class="section-title">Exercise Objectives</h2>
+        </div>
+
+        <div class="objectives-list">
+            {{#each objectives}}
+            <div class="objective-card">
+                <div class="objective-number">{{this.number}}</div>
+                <div class="objective-content">
+                    <h4 class="objective-title">{{this.title}}</h4>
+                    <p class="objective-description">{{this.description}}</p>
+                    <div class="objective-success">
+                        <strong>Success Criteria:</strong>
+                        <ul>
+                            {{#each this.successCriteria}}
+                            <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </section>
+
+    <!-- Facilitator Guide -->
+    <section class="content-section" id="facilitator-guide">
+        <div class="section-header">
+            <span class="section-number">04</span>
+            <h2 class="section-title">Facilitator Guide</h2>
+        </div>
+
+        <div class="facilitator-intro">
+            <div class="info-box">
+                <div class="info-icon">ℹ️</div>
+                <div class="info-content">
+                    <strong>Facilitator Role:</strong> Guide discussion without providing answers.
+                    Use open-ended questions to draw out participant thinking. Maintain psychological
+                    safety and encourage honest dialogue.
+                </div>
+            </div>
+        </div>
+
+        <!-- Inject Cards -->
+        <div class="injects-container">
+            {{#each injects}}
+            <div class="inject-card {{this.severity}}">
+                <div class="inject-header">
+                    <div class="inject-time-badge">{{this.time}}</div>
+                    <div class="inject-title">{{this.title}}</div>
+                    <div class="inject-id">{{this.id}}</div>
+                </div>
+
+                <div class="inject-body">
+                    <div class="inject-scenario">
+                        <h5>Scenario Development</h5>
+                        {{this.scenario}}
+                    </div>
+
+                    {{#if this.artifact}}
+                    <div class="inject-artifact">
+                        <h5>Artifact to Deliver</h5>
+                        <div class="artifact-box">
+                            <pre><code>{{this.artifact}}</code></pre>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    <div class="inject-expected">
+                        <h5>Expected Response</h5>
+                        <p>{{this.expectedResponse}}</p>
+                    </div>
+
+                    {{#if this.discussionQuestions}}
+                    <div class="inject-questions">
+                        <h5>Discussion Questions</h5>
+                        <ul>
+                            {{#each this.discussionQuestions}}
+                            <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+
+                    {{#if this.conditionalResponses}}
+                    <div class="inject-conditional">
+                        <h5>Conditional Responses</h5>
+                        {{#each this.conditionalResponses}}
+                        <div class="conditional-item">
+                            <strong>If participants ask: "{{this.trigger}}"</strong>
+                            <p>Response: {{this.response}}</p>
+                        </div>
+                        {{/each}}
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </section>
+
+    <!-- Technical Atomics -->
+    <section class="content-section" id="atomics-runbook">
+        <div class="section-header">
+            <span class="section-number">05</span>
+            <h2 class="section-title">Technical Atomics Runbook</h2>
+        </div>
+
+        <div class="atomics-intro">
+            <div class="warning-box">
+                <div class="warning-icon">⚡</div>
+                <div class="warning-content">
+                    <strong>For Exercise Runner Only:</strong> This section contains exact technical
+                    steps to simulate the attack scenario. Follow the timed sequence precisely for
+                    realistic exercise delivery.
+                </div>
+            </div>
+        </div>
+
+        <div class="atomics-container">
+            {{#each atomics}}
+            <div class="atomic-card">
+                <div class="atomic-header">
+                    <div class="atomic-time">{{this.time}}</div>
+                    <div class="atomic-id-badge">{{this.id}}</div>
+                </div>
+
+                <h4 class="atomic-title">{{this.title}}</h4>
+
+                <div class="atomic-body">
+                    <div class="atomic-action">
+                        <h5>Action to Perform</h5>
+                        <p>{{this.action}}</p>
+                    </div>
+
+                    {{#if this.commands}}
+                    <div class="atomic-commands">
+                        <h5>Commands / Instructions</h5>
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">{{this.commandLanguage}}</span>
+                                <button class="code-copy">Copy</button>
+                            </div>
+                            <pre><code class="language-{{this.commandLanguage}}">{{this.commands}}</code></pre>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    <div class="atomic-expected">
+                        <h5>Expected Participant Response</h5>
+                        <p>{{this.expectedResponse}}</p>
+                    </div>
+
+                    {{#if this.fallback}}
+                    <div class="atomic-fallback">
+                        <h5>If No Response After 10 Minutes</h5>
+                        <p>{{this.fallback}}</p>
+                    </div>
+                    {{/if}}
+
+                    {{#if this.verification}}
+                    <div class="atomic-verification">
+                        <h5>Verification Checklist</h5>
+                        <ul class="checklist">
+                            {{#each this.verification}}
+                            <li><input type="checkbox"> {{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </section>
+
+    <!-- Gap Analysis -->
+    <section class="content-section" id="gap-analysis">
+        <div class="section-header">
+            <span class="section-number">06</span>
+            <h2 class="section-title">SOP/Playbook Gap Analysis</h2>
+        </div>
+
+        <div class="gap-summary">
+            <div class="gap-stats-grid">
+                <div class="stat-card critical">
+                    <div class="stat-value">{{gapStats.critical}}</div>
+                    <div class="stat-label">Critical Gaps</div>
+                </div>
+                <div class="stat-card high">
+                    <div class="stat-value">{{gapStats.high}}</div>
+                    <div class="stat-label">High Priority</div>
+                </div>
+                <div class="stat-card medium">
+                    <div class="stat-value">{{gapStats.medium}}</div>
+                    <div class="stat-label">Medium Priority</div>
+                </div>
+                <div class="stat-card low">
+                    <div class="stat-value">{{gapStats.low}}</div>
+                    <div class="stat-label">Low Priority</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gaps-container">
+            {{#each gaps}}
+            <div class="gap-card {{this.priority}}">
+                <div class="gap-header">
+                    <div class="gap-priority-badge">{{this.priority}}</div>
+                    <h4 class="gap-title">{{this.title}}</h4>
+                    <div class="gap-status">{{this.status}}</div>
+                </div>
+
+                <div class="gap-body">
+                    <div class="gap-trigger">
+                        <strong>Scenario Trigger:</strong> {{this.trigger}}
+                    </div>
+
+                    <div class="gap-required">
+                        <strong>Required Procedures:</strong>
+                        <ul class="checklist">
+                            {{#each this.requiredProcedures}}
+                            <li><input type="checkbox"> {{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+
+                    <div class="gap-impact">
+                        <strong>Impact if Missing:</strong> {{this.impact}}
+                    </div>
+
+                    <div class="gap-recommendation">
+                        <strong>Recommendation:</strong>
+                        <p>{{this.recommendation}}</p>
+                    </div>
+
+                    <div class="gap-assignment">
+                        <div class="assignment-row">
+                            <div class="assignment-field">
+                                <label>Owner:</label>
+                                <input type="text" placeholder="Assign owner" />
+                            </div>
+                            <div class="assignment-field">
+                                <label>Due Date:</label>
+                                <input type="date" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </section>
+
+    <!-- Evaluation Section -->
+    <section class="content-section" id="evaluation">
+        <div class="section-header">
+            <span class="section-number">07</span>
+            <h2 class="section-title">Evaluation & Metrics</h2>
+        </div>
+
+        <div class="evaluation-forms">
+            <h3 class="subsection-title">Observer Evaluation Form</h3>
+
+            <div class="evaluation-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Capability</th>
+                            <th>Excellent</th>
+                            <th>Satisfactory</th>
+                            <th>Needs Improvement</th>
+                            <th>Not Demonstrated</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Initial Detection</td>
+                            <td><input type="radio" name="detection"></td>
+                            <td><input type="radio" name="detection"></td>
+                            <td><input type="radio" name="detection"></td>
+                            <td><input type="radio" name="detection"></td>
+                            <td><input type="text" placeholder="Notes..."></td>
+                        </tr>
+                        <tr>
+                            <td>Containment Decision</td>
+                            <td><input type="radio" name="containment"></td>
+                            <td><input type="radio" name="containment"></td>
+                            <td><input type="radio" name="containment"></td>
+                            <td><input type="radio" name="containment"></td>
+                            <td><input type="text" placeholder="Notes..."></td>
+                        </tr>
+                        <tr>
+                            <td>Communication (Internal)</td>
+                            <td><input type="radio" name="comm-int"></td>
+                            <td><input type="radio" name="comm-int"></td>
+                            <td><input type="radio" name="comm-int"></td>
+                            <td><input type="radio" name="comm-int"></td>
+                            <td><input type="text" placeholder="Notes..."></td>
+                        </tr>
+                        <tr>
+                            <td>Communication (External)</td>
+                            <td><input type="radio" name="comm-ext"></td>
+                            <td><input type="radio" name="comm-ext"></td>
+                            <td><input type="radio" name="comm-ext"></td>
+                            <td><input type="radio" name="comm-ext"></td>
+                            <td><input type="text" placeholder="Notes..."></td>
+                        </tr>
+                        <tr>
+                            <td>Coordination</td>
+                            <td><input type="radio" name="coord"></td>
+                            <td><input type="radio" name="coord"></td>
+                            <td><input type="radio" name="coord"></td>
+                            <td><input type="radio" name="coord"></td>
+                            <td><input type="text" placeholder="Notes..."></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="aar-template">
+            <h3 class="subsection-title">After-Action Report Template</h3>
+
+            <div class="aar-section">
+                <h4>What Went Well</h4>
+                <textarea rows="5" placeholder="Document successes and effective responses..."></textarea>
+            </div>
+
+            <div class="aar-section">
+                <h4>Areas for Improvement</h4>
+                <textarea rows="5" placeholder="Document challenges and improvement opportunities..."></textarea>
+            </div>
+
+            <div class="aar-section">
+                <h4>Action Items</h4>
+                <table class="action-items-table">
+                    <thead>
+                        <tr>
+                            <th>Action Item</th>
+                            <th>Owner</th>
+                            <th>Due Date</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" placeholder="Action item..."></td>
+                            <td><input type="text" placeholder="Owner..."></td>
+                            <td><input type="date"></td>
+                            <td>
+                                <select>
+                                    <option>Critical</option>
+                                    <option>High</option>
+                                    <option>Medium</option>
+                                    <option>Low</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer on every page -->
+    <footer class="page-footer">
+        <div class="footer-left">
+            {{title}} - Tabletop Exercise
+        </div>
+        <div class="footer-center">
+            CONFIDENTIAL
+        </div>
+        <div class="footer-right">
+            Page <span class="page-number"></span>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,824 @@
+{
+  "title": "Rainbow Six: Siege - Distributed DDoS Attack",
+  "subtitle": "Multi-vector DDoS attack targeting game servers and authentication services causing complete service outage during peak gaming hours",
+  "scenarioType": "Technical - Gaming Infrastructure & DDoS Mitigation",
+  "targetAudience": "SOC Analysts, DevOps Engineers, Infrastructure Team, Game Operations, Network Security",
+  "duration": "90-120 minutes",
+  "difficulty": "Intermediate",
+  "severity": "HIGH",
+  "preparedBy": "Security Operations Team",
+  "date": "February 6, 2026",
+  "version": "1.0",
+
+  "executiveSummary": "This tabletop exercise simulates a coordinated distributed denial-of-service (DDoS) attack against Rainbow Six: Siege game infrastructure during peak evening hours. The attack combines volumetric network floods with application-layer attacks targeting game servers, authentication services, and CDN infrastructure. With over 200,000 concurrent players affected and social media backlash mounting, teams must coordinate rapid detection, mitigation, and communication while maintaining service availability.",
+
+  "attackVector": "Multi-vector DDoS: UDP amplification (500+ Gbps), SYN floods, and Layer 7 HTTP floods targeting game matchmaking and authentication APIs",
+
+  "potentialImpact": "Complete service outage affecting 200K+ concurrent players, revenue loss ($50K+/hour), player churn, reputation damage, potential ransom demands",
+
+  "testingGoals": "Validate DDoS detection and mitigation procedures, test CDN failover mechanisms, evaluate cross-team communication during high-pressure outages, identify gaps in player communication protocols",
+
+  "criticalGaps": "DDoS mitigation playbook for gaming infrastructure, automated CDN failover procedures, player communication templates during attacks, incident escalation thresholds",
+
+  "scenarioOverview": "Your gaming company operates Rainbow Six: Siege, a popular tactical shooter with millions of active players worldwide. It's Friday evening at 8:00 PM EST - peak gaming hours with over 200,000 concurrent players online. Your infrastructure includes: game servers across 15 regions, centralized authentication/matchmaking services, CDN for asset delivery, and player data APIs. Without warning, your monitoring systems light up with alerts: network traffic has spiked to 500+ Gbps, game servers are unreachable, and players are flooding social media with complaints about connection errors. Your NOC confirms: you're under a massive distributed DDoS attack targeting multiple layers of your infrastructure. The attack is sophisticated, rotating between volumetric floods and application-layer attacks. Player sentiment on Twitter is rapidly turning negative, with #RainbowSixDown trending globally. Your CEO is asking for updates every 15 minutes. The clock is ticking.",
+
+  "facilitatorGuide": {
+    "preparation": {
+      "timeline": "Begin preparation 2-3 weeks before exercise",
+      "tasks": [
+        "Book war room or large conference room with projector/screen",
+        "Send calendar invites to all participants (SOC, DevOps, Infra, GameOps, PR/Comms)",
+        "Confirm availability of exercise runner (facilitator assistant)",
+        "Prepare digital inject materials (fake monitoring dashboards, Twitter screenshots)",
+        "Set up shared document for real-time note-taking (Google Doc or Confluence)",
+        "Print evaluation forms and gap analysis worksheets",
+        "Test projector and screen sharing setup",
+        "Prepare backup plan if remote participants have connectivity issues",
+        "Review Rainbow Six architecture diagram with technical participants beforehand",
+        "Coordinate with PR team to prepare realistic social media mockups"
+      ],
+      "materialsNeeded": [
+        "This facilitator guide printed or on tablet",
+        "Laptop connected to projector for displaying injects",
+        "Monitoring dashboard screenshots (pre-prepared fake alerts)",
+        "Twitter/social media mockups showing player complaints",
+        "Rainbow Six infrastructure diagram (high-level architecture)",
+        "Evaluation forms (one per participant)",
+        "Gap analysis worksheets",
+        "Whiteboard and markers for diagramming",
+        "Timer or clock visible to all participants",
+        "Name tents or labels for participants"
+      ],
+      "roomSetup": [
+        "U-shaped or conference table seating (encourages discussion)",
+        "Projector screen visible to all participants",
+        "Whiteboard for diagramming and action tracking",
+        "Separate observer area if evaluators are present",
+        "Ensure good ventilation and lighting (exercises can run long)",
+        "Coffee/water station nearby (no one should leave for bathroom without buddy)",
+        "Name tents for each participant showing name and role"
+      ]
+    },
+    "openingScript": "Good morning/afternoon everyone. Thank you for participating in today's tabletop exercise. I'm [Your Name] and I'll be facilitating. This is a learning exercise, not a test - there are no wrong answers, and this is not a performance evaluation. The goal is to identify gaps in our processes and improve our incident response capabilities.\n\nWe're going to simulate a DDoS attack against Rainbow Six infrastructure. I'll present the scenario, then deliver timed 'injects' - new information or complications. Your job is to discuss how you would respond as a team. Feel free to ask questions, request information, or disagree with each other - that's how we learn.\n\nLet's establish some ground rules before we begin.",
+    "groundRules": [
+      "No wrong answers - this is a learning environment, not a test",
+      "Psychological safety - speak openly without fear of judgment or consequences",
+      "Stay in character - respond as you would in a real incident, not theoretically",
+      "No phones or laptops except for note-taking (minimize distractions)",
+      "Assume normal staffing levels and resources (no 'we'd hire a consultant' shortcuts)",
+      "Ask clarifying questions anytime - facilitator has additional information",
+      "Respect speaking time - everyone's input matters, even junior team members",
+      "Disagree productively - different perspectives help identify gaps",
+      "Document action items as we go - we'll use these in gap analysis",
+      "Scheduled break at 45-minute mark (bathroom, coffee, stretch)"
+    ],
+    "flowOverview": "The exercise is structured as a chronological incident timeline starting at T+0 (initial detection) and progressing through multiple phases: detection, investigation, mitigation, escalation, and communication. Each inject introduces new complications or information requiring team decisions. The attack will escalate in sophistication, testing your ability to adapt. Total timeline spans 2 hours of simulated incident time, compressed into our 90-120 minute exercise. We'll pause after each inject for discussion, then move forward when the team reaches consensus or needs more information.",
+    "timing": {
+      "total": "90-120 minutes",
+      "breakdown": [
+        "Opening and ground rules: 10 minutes",
+        "Scenario overview and Q&A: 10 minutes",
+        "Inject sequence and discussion: 60-80 minutes (6 injects, ~10-12 min each)",
+        "Hot wash debrief: 15-20 minutes",
+        "Gap analysis and action items: 10-15 minutes"
+      ],
+      "flexibility": "If discussion is particularly productive on a key decision point, allow it to run longer. Better to cover fewer injects deeply than rush through all of them."
+    },
+    "facilitation": [
+      "Create psychological safety - emphasize learning over performance evaluation",
+      "Ask open-ended questions: 'What would you do next?' not 'Would you check logs?'",
+      "Draw out quieter participants: 'DevOps team, what's your perspective on this?'",
+      "Challenge assumptions gently: 'What if that system was also affected?'",
+      "Don't provide answers - guide participants to discover solutions themselves",
+      "Take notes on gaps and strong responses for debrief",
+      "Watch body language - if confusion or disagreement, pause and clarify",
+      "Keep energy high - DDoS exercises can become repetitive, vary your facilitation style",
+      "Connect injects to real incidents: 'This actually happened to [Company] in 2023'",
+      "Validate good ideas: 'That's excellent thinking, let's explore that approach'",
+      "Redirect tangents: 'That's important, let's table it for debrief and stay focused on containment'"
+    ],
+    "closingScript": "Thank you all for your engagement today. What we just experienced in 90 minutes could span several hours or days in a real incident - and you'd be exhausted, under pressure, and dealing with incomplete information. You handled this scenario [specific praise based on performance]. Before we wrap, let's do a quick hot wash: What went well? What was challenging? What surprised you? Then we'll identify specific gaps and action items to improve our readiness. Remember, the real value of this exercise comes from what we do AFTER - implementing the lessons learned. Let's make sure we don't let these insights gather dust.",
+    "troubleshooting": [
+      {
+        "issue": "Team completely stuck, no one responding",
+        "solution": "Provide a gentle prompt: 'Let's start with the SOC team - what's the first thing you'd check in your monitoring tools?' or 'What do your runbooks say about handling traffic spikes?'"
+      },
+      {
+        "issue": "One participant dominating discussion",
+        "solution": "Politely redirect: 'Thanks John, that's valuable. Let's hear from the DevOps perspective - Sarah, how would you approach this from the infrastructure side?'"
+      },
+      {
+        "issue": "Participants solving by throwing money at it ('We'd just buy Cloudflare Enterprise')",
+        "solution": "Acknowledge but constrain: 'That's a valid long-term solution, but assume you need to respond with your current tools and budget. What can you do RIGHT NOW?'"
+      },
+      {
+        "issue": "Technical jargon alienating non-technical participants",
+        "solution": "Ask for translation: 'For those less familiar with BGP routing, can someone explain what that means for our game servers?'"
+      },
+      {
+        "issue": "Debate over tool capabilities derailing scenario",
+        "solution": "Table it: 'Let's assume for this exercise that [tool] can do X. We'll note this as an action item to verify capabilities afterward.'"
+      },
+      {
+        "issue": "Participants referencing playbooks that don't exist",
+        "solution": "Clarify gently: 'Let's assume we don't have that specific playbook yet - that's actually a gap we want to identify. How would you improvise?'"
+      }
+    ]
+  },
+
+  "timelineEvents": [
+    {
+      "time": "T+0",
+      "title": "Initial Attack Detection - Traffic Spike",
+      "description": "Network monitoring systems trigger high-severity alerts showing 500+ Gbps inbound traffic spike across all game server regions. Simultaneously, player login failures spike from <1% to 85% within 5 minutes. NOC confirms network saturation on upstream ISP links.",
+      "severity": "high",
+      "impact": "Immediate player impact: 170,000+ concurrent players disconnected or unable to login. Customer support ticket queue grows from 12 to 400+ in 5 minutes.",
+      "facilitatorNotes": {
+        "context": "This is the classic 'oh no' moment where multiple systems are screaming simultaneously. Watch how the team prioritizes - do they split up to investigate different systems, or do they try to get a unified picture first? Many teams will immediately jump to solutions before fully understanding the scope.",
+        "discussionPrompts": [
+          "Which team takes the lead in the first 5 minutes - SOC, DevOps, or Network?",
+          "How do you quickly differentiate between a DDoS attack vs. legitimate traffic surge (game patch release, viral streamer)?",
+          "What's your first priority: stopping the attack, maintaining service, or understanding what's happening?",
+          "Who makes the decision to enable DDoS mitigation services (if not already enabled)?",
+          "At what point do you escalate to management vs. attempting to resolve internally first?"
+        ],
+        "teachingPoints": [
+          "DDoS attacks often affect multiple systems simultaneously - correlation is key",
+          "Volumetric attacks (500 Gbps) saturate network infrastructure before reaching application servers",
+          "Player experience degrades BEFORE systems go fully offline - login failures are early warning",
+          "Customer support becomes a real-time 'sensor' during player-impacting incidents",
+          "First 5 minutes set the tone: calm, coordinated response vs. chaotic fire-fighting"
+        ]
+      }
+    },
+    {
+      "time": "T+15",
+      "title": "Attack Vector Identification - UDP Amplification",
+      "description": "Network analysis reveals UDP amplification attack using NTP and DNS reflection. Attack traffic originates from 15,000+ unique source IPs across 45 countries. ISP upstream mitigation partially activated but attack adapting in real-time, shifting to new reflection methods.",
+      "severity": "high",
+      "impact": "Partial mitigation reduces traffic to 200 Gbps but login services still degraded. ~50% of players reconnected, but matchmaking queues experiencing 5-10 minute delays instead of typical 30 seconds.",
+      "facilitatorNotes": {
+        "context": "Now the team has more information but the attack is adapting. This tests whether they have playbooks for multi-vector DDoS and whether they understand different mitigation strategies for different attack types. Watch for coordination between network security and game operations teams.",
+        "discussionPrompts": [
+          "Your ISP mitigation is helping but not solving it - what additional layers of defense do you activate?",
+          "How do you distinguish attack traffic from legitimate player traffic at this scale?",
+          "Do you implement aggressive rate limiting knowing it might block legitimate players?",
+          "How are you communicating with players right now - social media, in-game messages, nothing?",
+          "What data are you collecting for post-incident analysis and potential law enforcement?"
+        ],
+        "teachingPoints": [
+          "Sophisticated attackers adapt to mitigation in real-time - expect attack vectors to shift",
+          "UDP amplification attacks exploit misconfigured public servers (NTP, DNS, SSDP, Memcached)",
+          "15,000+ source IPs indicates botnet, not single attacker - blocking IPs individually is futile",
+          "Partial service restoration creates difficult decisions: risk further disruption with aggressive mitigation?",
+          "Player communication during degraded service is critical - silence breeds social media anger"
+        ]
+      }
+    },
+    {
+      "time": "T+30",
+      "title": "Layer 7 Application Attack Detected",
+      "description": "While network team battles volumetric attack, SOC detects secondary application-layer attack: HTTP floods targeting game matchmaking API endpoints. Attack uses legitimate-looking requests with randomized user agents, bypassing rate limits. Authentication service CPU utilization hits 95%, causing cascading delays.",
+      "severity": "critical",
+      "impact": "Matchmaking completely broken despite network stabilization. Players can login but cannot join matches. Effective service outage continues. Social media backlash intensifying with #RainbowSixDown trending at #3 globally.",
+      "facilitatorNotes": {
+        "context": "This is the 'aha' moment where teams realize it's not just a network problem - the application layer is under attack too. Many DDoS playbooks focus only on volumetric attacks. This tests whether teams have visibility into application-layer attacks and can coordinate responses across infrastructure and application teams.",
+        "discussionPrompts": [
+          "Why didn't you detect the Layer 7 attack earlier? What visibility gaps exist?",
+          "How do you mitigate HTTP floods without blocking legitimate player API requests?",
+          "Do you implement CAPTCHA challenges knowing it degrades player experience?",
+          "Your network is stable but the application is crushed - where do you focus resources?",
+          "Social media is exploding - do you communicate now, or wait until service is restored?"
+        ],
+        "teachingPoints": [
+          "Multi-vector attacks intentionally split defender attention across network and application layers",
+          "Application-layer attacks are harder to mitigate - they look like legitimate traffic",
+          "CPU exhaustion from processing malicious requests can be as effective as network saturation",
+          "Gaming APIs have unique challenges: sessions, state, real-time requirements make CAPTCHA difficult",
+          "Social media monitoring should be part of incident response - it's real-time player sentiment data"
+        ]
+      }
+    },
+    {
+      "time": "T+60",
+      "title": "Ransom Demand Received",
+      "description": "Anonymous email arrives at security@company.com and CEO's public email. Subject: 'Stop the DDoS - Pay 5 BTC'. Message claims attack will intensify every hour until payment received, threatens to leak player database if payment not received within 24 hours. Includes proof: 1,000 player email addresses and bcrypt hashes from old 2023 breach (previously undisclosed).",
+      "severity": "critical",
+      "impact": "Attack motivation now clear - ransom DDoS. Legal and compliance implications escalate: old breach disclosure requirements, law enforcement notification, ransom payment considerations. CEO demanding immediate executive briefing.",
+      "facilitatorNotes": {
+        "context": "This inject introduces a major complication: it's not just vandalism, it's extortion. The leaked data proves the attackers have prior access (or purchased data from dark web). This tests executive communication, legal coordination, ransom payment policies, and old breach disclosure obligations. Watch for teams that separate the 'stop the DDoS' problem from the 'we need to brief executives' problem.",
+        "discussionPrompts": [
+          "Do you pay the ransom? Who makes that decision? What's your organization's policy?",
+          "How do you brief the CEO in 5 minutes when you're still fighting the attack?",
+          "The old breach data - is this a new breach or old data resurfacing? How do you determine that?",
+          "Do you notify law enforcement? FBI? Secret Service? IC3 report?",
+          "What changes in your mitigation strategy now that you know it's extortion?",
+          "Who handles ransom communication - do you respond, ignore, or try to gather intel?"
+        ],
+        "teachingPoints": [
+          "Ransom DDoS is increasingly common - attackers threaten, demonstrate capability, then demand payment",
+          "Paying ransom doesn't guarantee attack cessation - and may mark you as a willing payer",
+          "Old breach data being used as 'proof' complicates things - is this a new compromise or recycled data?",
+          "Executive communication during active incidents requires balance: enough detail to inform, not so much they panic",
+          "Law enforcement notification is complex: FBI for cyber extortion, but response time may not help immediate situation"
+        ]
+      }
+    },
+    {
+      "time": "T+90",
+      "title": "CDN Provider Under Attack",
+      "description": "Your CDN provider (hosting game assets, patches, store images) calls: they're seeing 800+ Gbps attack traffic targeting your account specifically. They've activated mitigation but warn they may need to temporarily suspend your account to protect other customers if attack continues to escalate. Loss of CDN means players can't download updates or access store.",
+      "severity": "high",
+      "impact": "Potential loss of CDN means inability to push hotfixes, player asset loading failures, store downtime. Alternative CDN failover untested at this scale. Financial impact: store revenue loss $10K+/hour.",
+      "facilitatorNotes": {
+        "context": "Attackers are now targeting your dependencies - classic DDoS escalation pattern. CDN providers have aggressive abuse policies because one customer's attack impacts many others. This tests whether teams have CDN failover plans, understand blast radius of losing CDN, and can coordinate with third-party vendors during crisis.",
+        "discussionPrompts": [
+          "Do you have a backup CDN provider? How long to failover?",
+          "Can you operate without CDN? What breaks - just store, or critical game functionality?",
+          "How do you negotiate with CDN provider - do they have special DDoS mitigation tiers?",
+          "If CDN suspends your account, how do you communicate that to players?",
+          "Should you proactively failover to backup CDN before suspension, even if untested?"
+        ],
+        "teachingPoints": [
+          "Third-party service providers are often the weakest link in DDoS resilience",
+          "CDN providers prioritize their infrastructure over individual customers during massive attacks",
+          "Failover to backup providers should be tested regularly - not during active incident",
+          "Gaming infrastructure often has hidden CDN dependencies beyond obvious asset delivery",
+          "Vendor contracts should include DDoS SLAs - but those are often untested until needed"
+        ]
+      }
+    },
+    {
+      "time": "T+120",
+      "title": "Attack Subsides - Post-Incident Analysis Begins",
+      "description": "After 2 hours, attack traffic drops to near-zero within 5 minutes. All services gradually return to normal. Player reconnections stabilize, matchmaking queues clear. No ransom paid. No additional data leaked. Attack appears to have ended spontaneously. Network forensics team begins analysis of attack patterns, source IPs, and timeline correlation.",
+      "severity": "medium",
+      "impact": "Service restored but player trust damaged. Estimated 20% of active players logged off in frustration. Social media sentiment negative. Financial impact: ~$100K revenue loss (2 hours x $50K/hr), plus reputational damage. Post-incident investigation and hardening required.",
+      "facilitatorNotes": {
+        "context": "The attack stopping suddenly is realistic - many DDoS attacks are time-limited demonstrations. But teams often relax too quickly without considering whether this is truly over or a temporary pause. This tests post-incident processes: forensics, player communication, lessons learned, and preparation for future attacks.",
+        "discussionPrompts": [
+          "Is the attack really over, or just paused? How do you verify?",
+          "What immediate hardening steps do you take assuming they'll attack again?",
+          "How do you communicate with players - apologize, explain, compensate with in-game items?",
+          "What data do you collect for law enforcement and future prevention?",
+          "Debrief timing - hot wash now while fresh, or let teams rest first?",
+          "What executive communication happens now - board notification, public statement, press release?"
+        ],
+        "teachingPoints": [
+          "DDoS attacks ending abruptly is common - attackers have limited resources or make their point",
+          "Post-incident hardening window is critical - attackers often return within 24-48 hours",
+          "Player communication after service restoration can rebuild trust - or destroy it if handled poorly",
+          "Forensic data collection must happen quickly - logs rotate, memory dumps are lost",
+          "Real learning happens in post-incident review - block time for deep technical retrospective"
+        ]
+      }
+    }
+  ],
+
+  "objectives": [
+    {
+      "number": 1,
+      "title": "Test DDoS Detection and Initial Response",
+      "description": "Evaluate the team's ability to rapidly detect DDoS attacks across multiple vectors (volumetric and application-layer), coordinate initial response across SOC/DevOps/Infrastructure teams, and implement first-line mitigation strategies within the critical first 15 minutes of an attack.",
+      "successCriteria": [
+        "Attack detected within 5 minutes of initial traffic spike through automated monitoring alerts",
+        "Clear incident commander assigned within 10 minutes with defined roles for each team",
+        "Initial mitigation (ISP upstream filtering, rate limiting) activated within 15 minutes",
+        "Team correctly identifies multi-vector attack (volumetric + application layer) within 30 minutes",
+        "Communication channels established (Slack war room, conference bridge) for coordinated response"
+      ],
+      "facilitatorNotes": {
+        "focusAreas": [
+          "Speed of detection - do automated alerts work as expected?",
+          "Role clarity - does everyone know their responsibilities immediately?",
+          "Decision-making under pressure - who makes the call to activate expensive mitigation?",
+          "Cross-team coordination - how do SOC, DevOps, and Network teams communicate?",
+          "Tooling effectiveness - can teams actually see what's happening quickly?"
+        ],
+        "commonMistakes": [
+          "Waiting for complete information before acting - speed matters in DDoS response",
+          "Each team working in silos without coordinated incident command structure",
+          "Focusing solely on network layer while application layer burns",
+          "Over-reliance on single mitigation strategy (e.g., only blocking IPs)",
+          "Forgetting to loop in Game Operations team who understands player impact"
+        ],
+        "timeGuidance": "Spend 25-30 minutes on Objectives 1-related injects (T+0 to T+30). This is where most 'process gaps' will be revealed - incident command, runbooks, tool access, communication channels."
+      }
+    },
+    {
+      "number": 2,
+      "title": "Validate Executive Communication and Ransom Decision Framework",
+      "description": "Test the team's ability to communicate incident status to executive leadership under time pressure, evaluate organizational policy and decision-making framework for ransom payments, coordinate with legal/compliance on breach disclosure obligations, and manage law enforcement notification procedures.",
+      "successCriteria": [
+        "Executive briefing delivered within 20 minutes of ransom demand using clear, non-technical language",
+        "Team correctly identifies data leak as potentially old 2023 breach requiring investigation",
+        "Ransom payment decision escalated to appropriate authority (CEO, Board) with pros/cons analysis",
+        "Law enforcement (FBI, IC3) notified within 60 minutes with appropriate details",
+        "Legal/compliance team engaged for breach notification assessment (GDPR, state laws)"
+      ],
+      "facilitatorNotes": {
+        "focusAreas": [
+          "Executive communication quality - can technical teams translate to business impact?",
+          "Ransom payment policy - does one exist? Is it documented and known?",
+          "Legal coordination - is legal team part of incident response or afterthought?",
+          "Law enforcement relationships - do teams know who to call and what to share?",
+          "Parallel workstreams - can teams continue mitigation while handling executive/legal matters?"
+        ],
+        "commonMistakes": [
+          "Trying to fully resolve incident before briefing executives - they need updates, not solutions",
+          "Not having a pre-defined ransom payment policy forcing real-time ethical debates",
+          "Treating the data leak as separate from the DDoS - they're parts of same extortion campaign",
+          "Over-sharing technical details with executives who need business impact summary",
+          "Assuming law enforcement can't help because attack is overseas"
+        ],
+        "timeGuidance": "Spend 20-25 minutes on Objective 2 (T+60 inject and discussion). Ransom payment ethics can consume excessive time - keep it focused on organizational policy and decision framework, not philosophical debate."
+      }
+    },
+    {
+      "number": 3,
+      "title": "Evaluate Player Communication and Service Recovery",
+      "description": "Assess the team's ability to communicate with affected players during and after the incident, coordinate with customer support and community management teams, implement service recovery procedures (compensation, apologies), and conduct effective post-incident analysis to prevent recurrence.",
+      "successCriteria": [
+        "Player communication initiated within 30 minutes via Twitter, Discord, in-game messages",
+        "Community management team provided regular updates throughout incident (every 30-60 min)",
+        "Post-incident player communication includes transparent explanation and compensation plan",
+        "Hot wash debrief scheduled within 24 hours while incident details are fresh",
+        "Action items identified for hardening (CDN failover testing, enhanced DDoS mitigation, playbook updates)"
+      ],
+      "facilitatorNotes": {
+        "focusAreas": [
+          "Player communication timing - when is it appropriate to communicate vs. stay silent?",
+          "Message quality - do teams understand player perspective and appropriate tone?",
+          "Customer support coordination - how does CS team get info to respond to tickets?",
+          "Service recovery - what compensation makes sense (refunds, in-game currency, apology)?",
+          "Post-incident learning - will action items actually get implemented or forgotten?"
+        ],
+        "commonMistakes": [
+          "Staying silent too long - players interpret silence as incompetence or not caring",
+          "Over-promising ('services will be back in 10 minutes') then missing deadlines",
+          "Generic corporate speak instead of authentic, transparent communication",
+          "Forgetting that customer support team is flooded and needs talking points",
+          "Skipping post-incident review because 'we're too busy' - guaranteed repeat performance"
+        ],
+        "timeGuidance": "Spend 15-20 minutes on Objective 3 (T+90 to T+120 and aftermath). Player communication quality directly impacts retention - this is business-critical, not just PR fluff."
+      }
+    }
+  ],
+
+  "injects": [
+    {
+      "id": "DDOS-DETECT-001",
+      "time": "T+0",
+      "title": "Network Traffic Spike - 500+ Gbps Inbound",
+      "severity": "high",
+      "scenario": "Your network monitoring dashboard explodes with red alerts: inbound traffic across all regions has spiked from normal 50 Gbps to over 500 Gbps in under 3 minutes. Simultaneously, your on-call engineer receives PagerDuty alerts for game server connectivity issues. Player login success rate has dropped from 99% to 15% in the last 5 minutes. NOC confirms upstream ISP links are saturated. Phone is ringing - it's your ISP asking if you're aware of the massive traffic spike.",
+      "artifact": "MONITORING ALERT - HIGH SEVERITY\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nAlert: Network Traffic Anomaly\nTime: 20:03:42 EST\nSeverity: HIGH\n\nMetrics:\n  Inbound Traffic: 523 Gbps (normal: 45-60 Gbps)\n  Packet Rate: 850M pps\n  Source IPs: 12,000+ unique\n  Protocols: UDP (89%), TCP (11%)\n  Top Ports: 80 (HTTP), 443 (HTTPS), UDP/high-random\n\nImpacted Services:\n  ❌ game-auth-prod (connectivity: 15%)\n  ❌ matchmaking-api-us-east (timeout)\n  ❌ matchmaking-api-eu-west (timeout)\n  ⚠️  game-servers-* (degraded, 60% unreachable)\n  ✓  cdn.rainbowsix.net (operational)\n  \nPlayer Impact:\n  Login Success: 15% (normal: 99%+)\n  Active Sessions: Dropping rapidly\n  Support Tickets: 412 new (last 5 min)",
+      "expectedResponse": "SOC team recognizes DDoS attack pattern, initiates incident response procedure, assigns incident commander, activates war room communication channels, contacts ISP to activate upstream DDoS mitigation, implements initial rate limiting, engages Infrastructure and DevOps teams, begins player impact assessment.",
+      "discussionQuestions": [
+        "Who is the incident commander for this scenario? How is that role assigned?",
+        "What's your first action - investigate the cause, or immediately activate mitigation?",
+        "How do you quickly determine if this is malicious attack vs. legitimate traffic surge (e.g., popular streamer causing player influx)?",
+        "Do you have contracts with DDoS mitigation providers (Cloudflare, Akamai, etc.)? How long to activate?",
+        "At what traffic threshold do you automatically escalate to management vs. handle at ops level?",
+        "How are you communicating with players right now - any social media posts, in-game messages?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "What does the packet capture show?",
+          "response": "NetFlow data shows fragmented UDP packets with spoofed source IPs from around the world. Packet payloads appear to be NTP and DNS response traffic - classic amplification attack. Actual attack sources are likely much smaller botnet sending small requests to public NTP/DNS servers with your IPs as spoofed source, causing massive amplified responses to flood your network."
+        },
+        {
+          "trigger": "What is our ISP saying?",
+          "response": "Your ISP confirms they're seeing the traffic spike and have activated their DDoS mitigation service (included in your enterprise plan). They're implementing BGP blackholing for the most egregious traffic patterns, but can't fully filter without risking legitimate traffic loss. They estimate 30-40% of attack traffic is being dropped, but it's not enough. They recommend activating a cloud-based DDoS scrubbing service like Cloudflare or Akamai for Layer 7 protection."
+        },
+        {
+          "trigger": "Can we just block all the source IPs?",
+          "response": "You try to implement IP-based blocking, but there are over 12,000 unique source IPs and growing. Your firewall ACLs are limited to 10,000 entries and already approaching that limit. Even if you could block them all, they're spoofed IPs in a reflection attack - the actual attackers aren't in this list. IP blocking is ineffective against this type of DDoS. You need upstream scrubbing or protocol-level mitigation."
+        }
+      ],
+      "facilitatorNotes": {
+        "setup": "This is the opening inject - it needs to be impactful and clearly convey urgency. Display the monitoring alert on the projector prominently. If possible, use actual screenshots from your monitoring tools (Grafana, Datadog, etc.) edited to show attack traffic. Consider playing a subtle alarm sound effect when delivering this inject to increase realism.",
+        "delivery": "Read the scenario with urgency in your voice - this is a crisis moment. Emphasize the rapid timeline (3 minutes from normal to disaster) and the player impact (hundreds of thousands affected). Make eye contact with the SOC team lead when mentioning PagerDuty alerts - they should feel the heat.",
+        "expectedTime": "15-20 minutes",
+        "keyPoints": [
+          "500 Gbps is a massive attack - this isn't script kiddie level, it's professional or state-sponsored",
+          "Volumetric attacks saturate network before reaching application servers - Layer 3/4 problem",
+          "Player login failures are the immediate business impact - this isn't just IT problem, it's revenue loss",
+          "ISP upstream mitigation is first line of defense but often insufficient alone",
+          "Multi-team coordination required immediately - network, security, game ops, communications"
+        ],
+        "redFlags": [
+          "Team tries to investigate deeply before taking any mitigation action - analysis paralysis",
+          "No one clearly takes incident commander role - everyone working independently",
+          "Focus on technical problem without considering player communication",
+          "Assumption that ISP mitigation will solve everything without activating additional defenses",
+          "Not documenting actions in real-time - chaos creates memory gaps later"
+        ],
+        "hints": [
+          "If team is stuck: 'Your DDoS mitigation playbook is open on your desk - what does it say as first step?'",
+          "If no incident commander: 'Who is empowered to make the call to activate paid DDoS mitigation services?'",
+          "If ignoring players: 'Your phone buzzes - it's the Community Manager asking for an update to post on Twitter. What do you tell them?'",
+          "If overthinking: 'You have 30 seconds to make a decision - activate Cloudflare DDoS protection yes or no?'"
+        ],
+        "successIndicators": [
+          "Clear incident commander assigned within 2-3 minutes of discussion",
+          "Team immediately recognizes DDoS attack pattern (not confused about cause)",
+          "Mention of activating upstream or cloud-based DDoS mitigation within 5 minutes",
+          "Someone mentions player communication or checking social media",
+          "Team splits responsibilities - some investigate, some mitigate, some communicate"
+        ],
+        "transition": "Once the team has decided on initial mitigation strategy and assigned roles, acknowledge their decisions and transition: 'Good, you've activated ISP mitigation and stood up the incident response team. Let's fast-forward 15 minutes and see how the attack is evolving...'"
+      }
+    },
+    {
+      "id": "DDOS-LAYER7-001",
+      "time": "T+30",
+      "title": "Application-Layer HTTP Flood Detected",
+      "severity": "critical",
+      "scenario": "Your network team reports that the volumetric attack is being mitigated - traffic is down to 200 Gbps and mostly filtered. But players are still reporting connection issues. SOC analyst digs deeper and discovers a SECOND attack vector: HTTP floods targeting your game matchmaking API. Attack is sending 500,000+ requests/second with randomized user agents and headers, bypassing your rate limiting. Authentication service CPU is pegged at 95%. Application servers are responsive on the network layer but crushed at the application layer. This is a coordinated multi-vector attack.",
+      "artifact": "SOC ANALYST FINDING:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nApplication Layer Attack Detected\n\nTarget: matchmaking-api.rainbowsix.net/queue\nMethod: HTTP POST flood\nRate: 500,000+ req/sec\nSource IPs: 8,000+ unique (distributed)\nUser-Agents: Randomized (Chrome, Firefox, Safari variants)\nHTTP Headers: Legitimate-looking, randomized referrers\n\nAuthentication Service Impact:\n  CPU: 95% (normal: 30-40%)\n  Response Time: 8.5s (normal: 120ms)\n  Error Rate: 34% (timeouts)\n  Queue Depth: 45,000 pending requests\n\nPlayer Impact:\n  Can login: ✓ (auth working but slow)\n  Can join matches: ❌ (matchmaking broken)\n  In-game experience: ❌ (disconnections)\n  \nMitigation Status:\n  Network Layer: ✓ (ISP filtering working)\n  Application Layer: ❌ (bypassing rate limits)",
+      "expectedResponse": "Team recognizes this as Layer 7 DDoS requiring different mitigation strategy than network-layer attacks. Activates Web Application Firewall (WAF) rules, implements aggressive rate limiting, considers CAPTCHA challenges, deploys application-layer DDoS protection (Cloudflare, Akamai), scales authentication service horizontally if possible, investigates why rate limiting was bypassed.",
+      "discussionQuestions": [
+        "Why didn't your rate limiting work? How are attackers bypassing it?",
+        "Do you implement CAPTCHA to distinguish humans from bots? What's the player experience tradeoff?",
+        "Can you scale your authentication/matchmaking services horizontally to absorb attack?",
+        "How do you distinguish attack traffic from legitimate players at the application layer?",
+        "Do you have WAF rules for DDoS? Are they pre-configured or do you need to write them now?",
+        "At what point do you put the game into 'maintenance mode' to fully stop the attack?"
+      ],
+      "conditionalResponses": [
+        {
+          "trigger": "Can we just block all the attacking IPs at the application level?",
+          "response": "You implement IP blocking, but within 5 minutes the attack shifts to 6,000 NEW source IPs. Classic bot behavior - massive IP rotation. You'd be playing whack-a-mole forever. Need a different strategy than IP blocking. Consider behavior-based detection, rate limiting per endpoint, or CAPTCHA challenges."
+        },
+        {
+          "trigger": "What if we enable CAPTCHA for all login attempts?",
+          "response": "You enable CAPTCHA for authentication. Attack traffic drops significantly - bots can't solve CAPTCHAs. But legitimate players are FURIOUS. Social media explodes with complaints: 'I have to solve a CAPTCHA every time I want to play?! Fix your servers!' Community sentiment turns from sympathetic to hostile. Customer support is overwhelmed. CAPTCHA is effective but player experience is destroyed. How do you balance security and usability?"
+        },
+        {
+          "trigger": "Can we scale up authentication services to handle the load?",
+          "response": "Your infrastructure team spins up 10x additional authentication service pods in Kubernetes. Response times improve from 8.5s to 2s, but CPU is still at 80% and attack is adapting - request rate increases to 700,000/sec as botnet detects you're absorbing more load. You're in an arms race. Scaling helps but doesn't solve the root problem. You need to filter malicious traffic, not just absorb it."
+        }
+      ],
+      "facilitatorNotes": {
+        "setup": "This inject reveals that the initial mitigation was only solving PART of the problem. Display the analyst finding prominently - ideally show CPU graphs pegged at 95%. This is where teams realize DDoS isn't just a network problem.",
+        "delivery": "Deliver this with a tone of 'just when you thought it was getting better...' emphasize that the network layer is fine but the application layer is burning. Call out the authentication service CPU at 95% - that's a critical system on the verge of failure.",
+        "expectedTime": "15-20 minutes",
+        "keyPoints": [
+          "Multi-vector attacks split defender attention - network and application teams must coordinate",
+          "Application-layer DDoS (Layer 7) looks like legitimate traffic - harder to filter",
+          "Rate limiting was bypassed because attack is distributed across 8,000+ IPs - per-IP limits ineffective",
+          "CPU exhaustion is as effective as bandwidth saturation for causing outages",
+          "Player experience tradeoffs: aggressive mitigation (CAPTCHA) stops attack but angers legitimate users"
+        ],
+        "redFlags": [
+          "Team celebrates network mitigation success without checking application health",
+          "Trying to solve Layer 7 attack with Layer 3/4 tools (IP blocking, network firewalls)",
+          "Not considering Web Application Firewall or cloud-based Layer 7 protection",
+          "Scaling infrastructure without filtering attack traffic - expensive and temporary",
+          "Ignoring player experience when implementing draconian mitigation (universal CAPTCHA)"
+        ],
+        "hints": [
+          "If stuck: 'Your Web Application Firewall has a DDoS protection mode - have you enabled it?'",
+          "If debating CAPTCHA: 'What if you only CAPTCHA users from suspicious IP ranges or after X failed attempts?'",
+          "If only thinking tech: 'Your Community Manager is asking - do we post an update to Twitter? What do you tell players?'",
+          "If overwhelmed: 'This is a sophisticated attack - is it time to call in your DDoS mitigation vendor for help?'"
+        ],
+        "successIndicators": [
+          "Recognition that this is different from network-layer attack requiring different tools",
+          "Mention of WAF, cloud-based Layer 7 protection, or behavior-based detection",
+          "Discussion of player experience tradeoffs (security vs usability)",
+          "Consideration of scaling application services while filtering attack traffic",
+          "Coordination between network security team and application/DevOps teams"
+        ],
+        "transition": "After team discusses mitigation options: 'Okay, you're implementing WAF rules and considering adaptive rate limiting. But before you can fully deploy, your phone rings. It's your manager: there's an email you need to see...'"
+      }
+    }
+  ],
+
+  "atomics": [
+    {
+      "id": "DDOS-DETECT-001",
+      "time": "T+0",
+      "title": "Display Network Traffic Spike Alert",
+      "action": "Project the network monitoring alert on screen showing 500+ Gbps traffic spike. If possible, use actual monitoring tool (Grafana, Datadog) with edited values to show realistic DDoS attack patterns. Display prominently for 2-3 minutes while teams react.",
+      "commands": "# Optional: Use this script to generate fake traffic graph\n# (For demonstration purposes only)\n\ncurl -X POST http://demo-grafana.local/api/annotations \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n    \"text\": \"DDoS Attack Detected - 523 Gbps inbound\",\n    \"tags\": [\"ddos\", \"critical\"],\n    \"time\": 1675287822000\n  }'\n\n# Or display pre-prepared screenshot:\nopen ~/tabletop-exercise/injects/ddos-alert-001.png",
+      "commandLanguage": "bash",
+      "expectedResponse": "Participants immediately recognize DDoS attack pattern, begin discussing incident command structure, someone mentions contacting ISP or activating DDoS mitigation service within 3-5 minutes.",
+      "fallback": "If no response after 5 minutes, prompt: 'Your on-call engineer just got paged with high-severity network alerts. What's your first step?' If still stuck: 'Your DDoS response playbook is open - what does it say to do when upstream bandwidth is saturated?'",
+      "verification": [
+        "Alert displayed clearly on projector/screen",
+        "All participants can see the monitoring dashboard",
+        "Facilitator has noted start time for tracking discussion duration",
+        "Runner ready to provide conditional responses if participants ask for packet captures, ISP status, etc."
+      ],
+      "facilitatorNotes": {
+        "preparation": "Create realistic monitoring dashboard screenshots BEFORE the exercise. Use your actual monitoring tools (Grafana, Datadog, CloudWatch) and edit values to show attack traffic. Save as high-resolution images. Test projector display before exercise starts. Have backup plan if technical issues prevent projection (printed copies on table).",
+        "executionTips": [
+          "Display the alert dramatically - this is the 'oh crap' moment that kicks off the exercise",
+          "Don't speak immediately after displaying - let participants absorb the information",
+          "Watch for participants who lean forward, pull out notepads, or immediately start talking - those are engaged",
+          "If room is silent after 30 seconds, prompt: 'You have 12,000+ concurrent players unable to login. What's your first move?'",
+          "Keep the alert on screen throughout T+0 discussion - participants will reference it"
+        ],
+        "troubleshooting": "If projector fails, have printed copies of the alert ready to distribute. If participants claim 'we'd never see this alert' because they don't have monitoring, note this as a critical gap and proceed with scenario anyway (assume hypothetical monitoring exists)."
+      }
+    },
+    {
+      "id": "DDOS-LAYER7-001",
+      "time": "T+30",
+      "title": "Display Application-Layer Attack Finding",
+      "action": "Show SOC analyst finding on screen: HTTP flood attack targeting matchmaking API with CPU graphs showing 95% utilization. Present this as 'new information just discovered' by SOC team during investigation. Display for 3-5 minutes during discussion.",
+      "commands": "# Display CPU utilization graph showing spike\nopen ~/tabletop-exercise/injects/cpu-spike-95-percent.png\n\n# Or generate live demo:\nwatch -n 1 'echo \"CPU: 95.2% | Memory: 78% | Requests/sec: 524,000\"'\n\n# Show application logs (fake):\necho \"[ERROR] Authentication timeout (8.5s)\n[ERROR] Queue overflow: 45,000 pending\n[WARN] Rate limiter bypassed: distributed IPs\n[ERROR] Matchmaking service unavailable\" | lolcat",
+      "commandLanguage": "bash",
+      "expectedResponse": "Participants recognize this is Layer 7 attack requiring different mitigation than network layer. Discussion shifts to WAF, application-layer rate limiting, CAPTCHA, or cloud-based DDoS protection. Someone mentions scaling application services.",
+      "fallback": "If participants don't recognize the significance, prompt: 'Why are players still unable to join matches even though network traffic is being mitigated?' If still confused: 'This is an application-layer attack - what tools do you have for Layer 7 DDoS protection?'",
+      "verification": [
+        "Application-layer finding displayed clearly",
+        "Participants discussing difference between Layer 3/4 and Layer 7 attacks",
+        "CPU graph visible showing 95% utilization spike",
+        "Runner ready to provide conditional responses about CAPTCHA, scaling, or IP blocking attempts"
+      ],
+      "facilitatorNotes": {
+        "preparation": "Create CPU/memory utilization graphs showing sudden spike to 95%. If possible, show actual application logs (sanitized from past incidents) demonstrating timeout errors and queue overflow. Prepare 2-3 follow-up 'conditional response' slides for common mitigation attempts (CAPTCHA, scaling, IP blocking).",
+        "executionTips": [
+          "Present this as a discovery moment: 'Your SOC analyst just found something...'",
+          "Emphasize the contrast: network is better, but application is dying",
+          "If team celebrates network mitigation too early, use this inject to reality-check them",
+          "Watch for participants who understand Layer 7 vs Layer 3/4 difference - they'll guide others",
+          "Be ready to explain what 'rate limiter bypassed' means if participants are confused"
+        ],
+        "troubleshooting": "If participants claim 'we don't have visibility into application metrics', note this as a gap and proceed with scenario. Explain that in this exercise, assume you discovered this through whatever means (APM tools, manual log checking, player reports)."
+      }
+    }
+  ],
+
+  "gapStats": {
+    "critical": 2,
+    "high": 3,
+    "medium": 2,
+    "low": 1
+  },
+
+  "gaps": [
+    {
+      "priority": "critical",
+      "title": "DDoS Response Playbook for Gaming Infrastructure",
+      "status": "MISSING",
+      "trigger": "Multi-vector DDoS attack affecting game servers, authentication, and matchmaking services",
+      "requiredProcedures": [
+        "DDoS attack detection and classification procedures (volumetric vs application-layer)",
+        "Incident command structure and role assignments during DDoS events",
+        "Step-by-step mitigation activation (ISP upstream, cloud scrubbing, WAF)",
+        "Escalation thresholds and decision trees (when to activate paid mitigation, when to go into maintenance mode)",
+        "Player communication templates and approval workflows during attacks",
+        "Coordination procedures between Network, SOC, DevOps, GameOps, and Community teams",
+        "Post-attack forensics and hardening checklist"
+      ],
+      "impact": "Delayed and uncoordinated response to DDoS attacks, confusion about roles and responsibilities, inconsistent mitigation strategies leading to prolonged outages, player trust damage from poor communication",
+      "recommendation": "Develop comprehensive DDoS incident response playbook specifically tailored to gaming infrastructure. Include decision trees for different attack types (volumetric, application-layer, multi-vector), pre-defined escalation thresholds, integration with existing monitoring and mitigation tools, and role-specific runbooks for each team. Test playbook quarterly through tabletop exercises and bi-annually through live attack simulations (red team).",
+      "facilitatorNotes": {
+        "evaluationGuidance": "Assess whether team has ANY documented DDoS response procedures. Many organizations have generic 'network incident' playbooks but nothing specific to DDoS. Look for evidence of: pre-defined mitigation activation steps, ISP/vendor contact procedures, role assignments, communication templates. If team is improvising everything, mark as MISSING. If they have basic procedures but missing key elements (like player communication), mark as INADEQUATE.",
+        "probeQuestions": [
+          "Do you have a documented DDoS response playbook? Where is it located?",
+          "Who is automatically designated as incident commander for DDoS attacks?",
+          "What are your pre-defined thresholds for activating expensive mitigation services?",
+          "How do you coordinate between network security, infrastructure, and game operations teams?",
+          "Do you have pre-approved templates for player communication during attacks?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: Documented playbook exists, tested within last 12 months, includes multi-vector scenarios, role assignments clear, integrated with monitoring tools",
+          "INADEQUATE: Basic procedures exist but not tested, missing key elements (player communication, Layer 7 mitigation), not tailored to gaming infrastructure",
+          "MISSING: No documented DDoS response procedures, team improvising everything, unclear roles and escalation paths"
+        ]
+      }
+    },
+    {
+      "priority": "critical",
+      "title": "Ransom DDoS Payment Decision Framework",
+      "status": "MISSING",
+      "trigger": "Attackers demand 5 BTC ransom to stop DDoS attack and threaten data leak",
+      "requiredProcedures": [
+        "Organizational policy on ransom payments (yes/no, under what circumstances)",
+        "Decision authority matrix (who can authorize payment, approval thresholds)",
+        "Legal and compliance consultation procedures (ransomware/extortion notification requirements)",
+        "Law enforcement notification and coordination (FBI, Secret Service, IC3 reporting)",
+        "Cryptocurrency acquisition procedures (if payment authorized)",
+        "Communication strategy with attackers (respond, gather intel, ignore)",
+        "Alternative mitigation strategies to consider before payment"
+      ],
+      "impact": "Ad-hoc ransom payment decisions made under extreme pressure without legal/ethical guardrails, potential legal violations (OFAC sanctions if paying ransomware groups), inconsistent organizational response creating precedent, reputational damage if payment becomes public",
+      "recommendation": "Establish clear organizational policy on ransom payments BEFORE an incident occurs. Policy should define: circumstances under which payment might be considered (life safety, critical infrastructure), approval authority and process, legal consultation requirements, law enforcement notification timing, and communication protocols. Document cyber insurance coverage and claim procedures. Pre-establish relationships with law enforcement cyber units (FBI Cyber Task Force) and cyber crisis response firms.",
+      "facilitatorNotes": {
+        "evaluationGuidance": "This is a sensitive topic. Assess whether organization has ANY documented policy on ransom payments. Many companies avoid creating policies assuming 'we'll never pay', but this creates chaos during actual extortion. Look for evidence of: documented decision framework, identified decision authority, legal consultation procedures, law enforcement notification protocols. If topic makes executives uncomfortable, that's a red flag - they need to address this before crisis.",
+        "probeQuestions": [
+          "Does your organization have a documented policy on ransom payments?",
+          "Who has authority to approve paying ransom - CISO, CEO, Board?",
+          "Have you consulted with legal counsel about legal implications of ransom payment?",
+          "What is your relationship with FBI Cyber Division - do you have a point of contact?",
+          "Does your cyber insurance policy cover ransom payments? What are the terms?",
+          "How do you determine if paying ransom violates OFAC sanctions?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: Written policy exists defining decision framework, legal consultation mandatory, law enforcement notification procedures documented, cyber insurance terms understood, tested through tabletop",
+          "INADEQUATE: Informal guidance exists but not documented, unclear decision authority, law enforcement relationships not established, cyber insurance terms not reviewed",
+          "MISSING: No policy, ad-hoc decisions under pressure, unclear legal implications, no law enforcement relationships"
+        ]
+      }
+    },
+    {
+      "priority": "high",
+      "title": "CDN Failover and Disaster Recovery Procedures",
+      "status": "INADEQUATE",
+      "trigger": "Primary CDN provider threatens to suspend account due to DDoS attack impact on their infrastructure",
+      "requiredProcedures": [
+        "Backup CDN provider contracts and activation procedures",
+        "CDN failover testing schedule and documented test results",
+        "DNS TTL optimization for rapid failover (pre-incident configuration)",
+        "Asset synchronization between primary and backup CDN",
+        "Application code changes required for CDN failover (if any)",
+        "Rollback procedures if backup CDN has issues",
+        "Communication procedures with CDN vendors during attacks"
+      ],
+      "impact": "Unable to push critical game patches or hotfixes during/after attack, player asset loading failures degrading game experience, store downtime causing revenue loss, extended recovery time if primary CDN suspends service, untested backup CDN may have unexpected compatibility issues",
+      "recommendation": "Implement multi-CDN architecture with automated failover capabilities. Test failover procedures quarterly (not just configuration checks - full traffic cutover tests). Optimize DNS TTLs for rapid failover while balancing caching benefits. Ensure game client code is CDN-agnostic (uses environment variables, not hardcoded CDN URLs). Document dependencies on CDN beyond obvious asset delivery - many games use CDN for configuration files, A/B testing configs, etc. Pre-negotiate DDoS SLAs with CDN provider including guaranteed uptime during attacks.",
+      "facilitatorNotes": {
+        "evaluationGuidance": "Many organizations have backup CDN contracts but have never actually tested failover. Mark as INADEQUATE if untested within last 6 months. Look for evidence of: documented failover procedures, successful test results, asset synchronization between CDNs, DNS configuration optimized for failover. If team says 'we could failover in a few hours', that's inadequate - should be minutes.",
+        "probeQuestions": [
+          "Do you have a backup CDN provider? When was the last failover test?",
+          "What is your DNS TTL for CDN records - is it optimized for rapid failover?",
+          "How long would it take to fully cutover to backup CDN - minutes, hours, or days?",
+          "Are game assets synchronized to backup CDN, or would you need to upload them during crisis?",
+          "Does your game client code work with multiple CDN providers without code changes?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: Multi-CDN architecture, automated failover tested quarterly, DNS TTL optimized, assets synchronized, documented procedures, sub-15-minute failover time",
+          "INADEQUATE: Backup CDN exists but untested or last tested >6 months ago, manual failover procedures, DNS not optimized, asset synchronization unclear",
+          "MISSING: Single CDN, no backup provider, no failover procedures, untested assumptions about recovery time"
+        ]
+      }
+    },
+    {
+      "priority": "high",
+      "title": "Player Communication During Service Outages",
+      "status": "INADEQUATE",
+      "trigger": "Massive player impact from DDoS attack, social media backlash mounting, customer support overwhelmed",
+      "requiredProcedures": [
+        "Player communication templates for different incident types (DDoS, breach, maintenance)",
+        "Approval workflows and authority levels (who can post what, when)",
+        "Multi-channel communication strategy (Twitter, Discord, in-game messages, website)",
+        "Update cadence guidelines (how often to post updates during incidents)",
+        "Community management team integration with incident response",
+        "Customer support briefing procedures and talking points",
+        "Service level commitments and compensation guidelines (refunds, in-game currency)"
+      ],
+      "impact": "Player trust erosion from poor communication or silence, negative social media amplification, customer support overwhelmed with same questions, community backlash spreading to reviews and retention metrics, competitors capitalizing on outage with targeted marketing",
+      "recommendation": "Develop comprehensive player communication playbook integrated with incident response procedures. Include pre-approved templates for common incidents (can be customized but provide starting point), defined approval workflows (minor incidents: community manager approves, major: VP approval), multi-channel publication checklist, and guidelines for authentic transparent communication vs corporate speak. Train community management team on incident communication best practices and involve them in incident response exercises. Establish relationship between SOC/DevOps and community team BEFORE incidents occur.",
+      "facilitatorNotes": {
+        "evaluationGuidance": "Player communication is often forgotten during technical incident response - mark as INADEQUATE if community management team is not integrated into incident response plans. Look for evidence of: communication templates, approval workflows, defined update cadence, customer support integration. Many technical teams say 'we'd post on Twitter' without considering WHO posts, WHAT they say, WHEN they post, and HOW customer support is briefed.",
+        "probeQuestions": [
+          "Who has authority to post player communication during incidents - community manager, executive approval required?",
+          "Do you have pre-written templates for common incident types that can be quickly customized?",
+          "How do you coordinate between incident response team and community management team?",
+          "What is your update cadence during major outages - every 30 min, hourly, only when resolved?",
+          "How does customer support team get briefed - do they have talking points, or improvising responses?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: Communication playbook exists and tested, community team part of incident response, templates for common scenarios, defined approval workflows, customer support integration, regular update cadence",
+          "INADEQUATE: Informal communication practices, community team not integrated, no templates, unclear approval authority, customer support learns from social media",
+          "MISSING: Ad-hoc communication, often after players discover issues themselves, no coordination between technical and community teams"
+        ]
+      }
+    },
+    {
+      "priority": "high",
+      "title": "Application-Layer DDoS Detection and Mitigation",
+      "status": "INADEQUATE",
+      "trigger": "Layer 7 HTTP flood targeting game APIs while network-layer mitigation is active",
+      "requiredProcedures": [
+        "Application-layer monitoring and anomaly detection (request rate, CPU, latency)",
+        "Web Application Firewall (WAF) configuration and DDoS-specific rules",
+        "Adaptive rate limiting strategies (per-IP, per-endpoint, per-user)",
+        "CAPTCHA or proof-of-work challenge implementation procedures",
+        "Application-layer DDoS fingerprinting (bot behavior analysis)",
+        "Horizontal scaling procedures for targeted services (authentication, matchmaking)",
+        "Coordination between infrastructure and application development teams"
+      ],
+      "impact": "Inability to detect or mitigate application-layer attacks even when network is stable, CPU/memory exhaustion causing service degradation, legitimate players impacted by overly aggressive mitigation (e.g., universal CAPTCHA), prolonged outages despite network-layer mitigation success",
+      "recommendation": "Implement comprehensive application-layer observability including request rate monitoring, endpoint-level latency tracking, and CPU/memory utilization alerts tied to specific services. Deploy Web Application Firewall with DDoS-specific rules and regularly test rule effectiveness. Develop adaptive rate limiting strategies that can be dynamically adjusted during attacks. Consider implementing proof-of-work challenges or behavioral analysis to distinguish bots from humans. Establish procedures for rapid horizontal scaling of targeted services. Most importantly: test Layer 7 mitigation strategies through controlled load testing - don't wait for real attack to discover WAF rules don't work.",
+      "facilitatorNotes": {
+        "evaluationGuidance": "Many teams have strong network-layer DDoS defenses but weak application-layer protection. Mark as INADEQUATE if WAF exists but DDoS rules are not configured or tested. Look for evidence of: application-layer monitoring, WAF deployment with DDoS rules, rate limiting capabilities, scaling procedures, testing results. If team says 'our WAF would handle it' without specifics, probe deeper - most default WAF configs don't protect well against sophisticated Layer 7 DDoS.",
+        "probeQuestions": [
+          "Do you have a Web Application Firewall? Are DDoS-specific rules configured and tested?",
+          "How do you monitor application-layer request rates and detect anomalies?",
+          "What rate limiting capabilities do you have - per-IP, per-endpoint, per-authenticated-user?",
+          "Have you tested Layer 7 DDoS mitigation through load testing or red team exercises?",
+          "Can you rapidly scale targeted services (authentication, matchmaking) during attacks?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: WAF deployed with tested DDoS rules, application-layer monitoring with anomaly detection, adaptive rate limiting, scaling procedures documented and tested, coordination between infra and dev teams",
+          "INADEQUATE: WAF exists but default config, limited application-layer visibility, static rate limiting, scaling procedures untested, siloed teams",
+          "MISSING: No WAF, no application-layer monitoring beyond basic metrics, no rate limiting, no scaling procedures"
+        ]
+      }
+    },
+    {
+      "priority": "medium",
+      "title": "Law Enforcement Coordination for Cyber Extortion",
+      "status": "MISSING",
+      "trigger": "Ransom demand received with threats of continued attack and data leak",
+      "requiredProcedures": [
+        "Pre-established relationships with FBI Cyber Division or local Cyber Task Force",
+        "IC3 (Internet Crime Complaint Center) reporting procedures",
+        "Evidence collection and preservation for law enforcement",
+        "Legal review of what information can be shared with law enforcement",
+        "Coordination procedures during ongoing attacks (when to notify, what to share)",
+        "Understanding of law enforcement capabilities and limitations (overseas attackers)",
+        "Post-incident cooperation procedures (providing evidence, victim statements)"
+      ],
+      "impact": "Delayed law enforcement notification reducing chances of attacker identification, improper evidence handling compromising potential prosecution, missed opportunities for threat intelligence sharing, lack of law enforcement support during extortion negotiations, regulatory compliance issues if notification required but delayed",
+      "recommendation": "Establish relationship with FBI Cyber Division or local FBI Cyber Task Force BEFORE incidents occur. Attend FBI InfraGard or CISA partnership meetings to build connections. Document procedures for law enforcement notification including IC3 reporting, evidence preservation, and legal review processes. Understand what law enforcement can and cannot do - they likely cannot stop overseas DDoS immediately but can assist with threat intelligence, trace ransom payments, and coordinate with international partners. Include law enforcement notification checklist in incident response playbooks.",
+      "facilitatorNotes": {
+        "evaluationGuidance": "Many organizations have never contacted law enforcement about cyber incidents, assuming 'they can't help with overseas attackers'. Mark as MISSING if no prior relationship or documented procedures. Look for evidence of: FBI Cyber Division contact information, IC3 reporting familiarity, evidence preservation procedures, legal review of sharing policies. If team says 'we'd call 911', that shows lack of understanding - cyber incidents go to FBI Cyber Division, not local police.",
+        "probeQuestions": [
+          "Do you have a point of contact at FBI Cyber Division or local Cyber Task Force?",
+          "Have you ever reported a cyber incident to law enforcement? What was the process?",
+          "How do you preserve evidence for potential law enforcement investigation?",
+          "What is your legal team's guidance on sharing information with law enforcement?",
+          "Do you participate in FBI InfraGard or CISA partnership programs?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: Established FBI Cyber Division relationship, documented notification procedures, evidence preservation processes, legal review completed, regular coordination through InfraGard/CISA",
+          "INADEQUATE: Generic 'call law enforcement' guidance, no specific contacts, unclear evidence preservation, no legal review of sharing policies",
+          "MISSING: No law enforcement relationships, no notification procedures, assumption that law enforcement 'can't help', no evidence preservation processes"
+        ]
+      }
+    },
+    {
+      "priority": "medium",
+      "title": "Post-DDoS Forensics and Hardening Procedures",
+      "status": "INADEQUATE",
+      "trigger": "Attack subsides after 2 hours, service restored but investigation and hardening needed",
+      "requiredProcedures": [
+        "Network traffic capture and analysis procedures (NetFlow, pcap)",
+        "Attack pattern documentation and IOC extraction",
+        "Root cause analysis framework for DDoS incidents",
+        "Vulnerability assessment of targeted services",
+        "Hardening checklist (rate limiting, WAF rules, infrastructure changes)",
+        "Threat intelligence sharing (ISP, CISA, industry groups)",
+        "Timeline documentation for potential law enforcement or insurance claims",
+        "Post-incident review (hot wash) scheduling and facilitation"
+      ],
+      "impact": "Inability to prevent repeat attacks because root causes not identified, missed opportunities to harden infrastructure, incomplete documentation for law enforcement or insurance claims, lack of threat intelligence sharing with industry peers, no organizational learning from incident",
+      "recommendation": "Develop comprehensive post-incident procedures specifically for DDoS attacks. Include forensic data collection requirements (NetFlow logs, firewall logs, application logs, CDN logs), attack pattern analysis templates, and structured root cause analysis framework. Create hardening checklist based on attack vector (e.g., if UDP amplification detected, ensure internal services not exploitable for reflection). Schedule hot wash debrief within 24 hours while details are fresh, followed by detailed post-incident review within one week. Share sanitized threat intelligence with industry peers through ISACs or CISA. Most importantly: assign owners and deadlines for hardening tasks - don't let findings become shelf-ware.",
+      "facilitatorNotes": {
+        "evaluationGuidance": "Post-incident processes are often rushed or skipped due to 'return to normal operations' pressure. Mark as INADEQUATE if no structured framework or if post-incident reviews are rarely completed. Look for evidence of: forensic data collection, attack documentation, root cause analysis, hardening implementation, threat intelligence sharing. If team says 'we'd do a lessons learned meeting' without specifics, that's inadequate - need documented procedures and accountability.",
+        "probeQuestions": [
+          "What forensic data do you collect after DDoS attacks for analysis?",
+          "Do you have a structured framework for root cause analysis of DDoS incidents?",
+          "How do you document attack patterns and IOCs for future detection?",
+          "What is your process for hardening infrastructure after attacks?",
+          "Do you share threat intelligence with industry peers or ISACs?",
+          "How do you ensure action items from post-incident reviews actually get implemented?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: Documented forensic procedures, attack analysis templates, structured root cause analysis, hardening checklist with owners/deadlines, threat intelligence sharing, action item tracking",
+          "INADEQUATE: Informal post-incident meetings, limited forensics, no structured analysis, hardening tasks assigned but not tracked, no threat intelligence sharing",
+          "MISSING: No post-incident procedures, forensic data lost or not collected, no systematic hardening, lessons learned forgotten"
+        ]
+      }
+    },
+    {
+      "priority": "low",
+      "title": "DDoS Attack Cost Tracking and Insurance Claims",
+      "status": "MISSING",
+      "trigger": "Need to quantify financial impact of DDoS attack for executives, board, and insurance claim",
+      "requiredProcedures": [
+        "Revenue impact calculation methodology (lost sales, player churn estimates)",
+        "Infrastructure cost tracking (DDoS mitigation service fees, bandwidth overages)",
+        "Personnel cost allocation (incident response team hours, overtime)",
+        "Reputational damage quantification (social media sentiment, review scores)",
+        "Cyber insurance claim procedures and documentation requirements",
+        "Legal/regulatory cost tracking (breach notification if data leaked)",
+        "Customer compensation cost estimates (refunds, in-game currency given to players)"
+      ],
+      "impact": "Inability to accurately quantify financial impact for executive reporting or board briefings, incomplete documentation for cyber insurance claims potentially resulting in denial or reduced payout, lack of data to justify future security investments, difficulty comparing cost of mitigation vs cost of attack",
+      "recommendation": "Develop framework for tracking and quantifying DDoS attack financial impact across multiple dimensions: direct revenue loss (store sales, microtransactions during outage), infrastructure costs (mitigation services, bandwidth), personnel costs (incident response hours), customer compensation, and estimated reputational damage. Document cyber insurance policy terms and claim requirements - many policies require specific documentation collected during incident. Create template for executive/board reporting that translates technical incident details into business impact metrics. Use post-incident cost analysis to justify security investments and insurance coverage levels.",
+      "facilitatorNotes": {
+        "evaluationGuidance": "Financial impact tracking is often overlooked during incidents when focus is on restoration. Mark as MISSING if no documented methodology for quantifying costs. Look for evidence of: revenue impact calculations, cost tracking procedures, cyber insurance familiarity, executive reporting templates. If team says 'we'd estimate it was expensive' without methodology, that's missing - need structured approach.",
+        "probeQuestions": [
+          "How do you calculate revenue loss during service outages?",
+          "Do you track all costs associated with DDoS incidents (mitigation, personnel, compensation)?",
+          "What does your cyber insurance policy cover for DDoS attacks?",
+          "What documentation does your insurer require for claims?",
+          "How do you quantify reputational damage from player-impacting incidents?"
+        ],
+        "maturityIndicators": [
+          "ADEQUATE: Documented cost tracking methodology, revenue loss calculations, cyber insurance terms understood, claim procedures documented, executive reporting templates, historical cost data for comparison",
+          "INADEQUATE: Informal cost estimates, incomplete tracking, cyber insurance terms not reviewed, no executive reporting template",
+          "MISSING: No cost tracking, revenue loss estimates guessed, cyber insurance coverage unknown, no structured reporting"
+        ]
+      }
+    }
+  ]
+}
